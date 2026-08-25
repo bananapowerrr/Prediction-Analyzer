@@ -238,3 +238,21 @@
 +
 +--- Исправь и не повторяй ошибку. Git не трогай. ---
 +
+
+# 2026-08-25 03:47:11.023982
++Контекст: проект `desktop-tutorial`. Корень git: D:\Workspace\desktop-tutorial. Работай ТОЛЬКО внутри этой папки. AgentBus на G:\Мой диск\AgentBus — НЕ часть проекта. Не создавай вложенную копию репозитория. НЕ выполняй git add/commit/push — это сделает диспетчер после проверки. Задача: Перезапиши .gitignore целиком в UTF-8 (без BOM). Содержимое строго такое:
++
++  __pycache__/
++  *.py[cod]
++  .env
++  .venv/
++  venv/
++  *.egg-info/
++  .pytest_cache/
++  .mypy_cache/
++  .aider*
++  .aider.tags.cache.v4/
++  test_aider.txt
++  test_push_*.txt
++
++  Больше ничего не меняй. Git не выполняй.
