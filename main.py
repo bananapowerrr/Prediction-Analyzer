@@ -15,7 +15,18 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.command == "status":
-        print("scanner ready")
+        if args.json:
+            status = {
+                "status": "ready",
+                "config": {
+                    "min_liquidity": MIN_LIQUIDITY_USD,
+                    "max_spread": MAX_SPREAD_PCT,
+                    "scan_limit": SCAN_LIMIT
+                }
+            }
+            print(json.dumps(status, indent=4))
+        else:
+            print("scanner ready")
         return
 
     markets = run_scan(min_liquidity=args.min_liquidity, max_spread=args.max_spread, min_volume=args.min_volume, limit=args.limit)
