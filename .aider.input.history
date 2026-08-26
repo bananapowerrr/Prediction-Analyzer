@@ -437,3 +437,24 @@
 +              out.append(m)
 +      return out
 +  No git.
+
+# 2026-08-26 11:31:04.599773
++Контекст: проект `desktop-tutorial`. Корень git: D:\Workspace\desktop-tutorial. Работай ТОЛЬКО внутри этой папки. AgentBus на G:\Мой диск\AgentBus — НЕ часть проекта. Не создавай вложенную копию репозитория. НЕ выполняй git add/commit/push — это сделает диспетчер после проверки. Задача: Rewrite main.py completely.
++  import argparse
++  from data.scanner import run_scan
++
++  def main() -> None:
++      parser = argparse.ArgumentParser()
++      parser.add_argument("command", nargs="?", default="scan", choices=["scan", "status"])
++      args = parser.parse_args()
++      if args.command == "status":
++          print("scanner ready")
++          return
++      markets = run_scan()
++      print(len(markets))
++      for m in markets[:20]:
++          print(m.question)
++
++  if __name__ == "__main__":
++      main()
++  No git.
