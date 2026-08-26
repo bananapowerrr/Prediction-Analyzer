@@ -7,7 +7,7 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.command == "status":
-        print("Scanner is ready")
+        print("scanner ready")
         return
 
     markets = run_scan()

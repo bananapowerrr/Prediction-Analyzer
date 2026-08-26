@@ -1,8 +1,9 @@
 from core.models import Market
 from data.filters import passes_liquidity_gate, passes_spread_gate
 from data.polymarket_client import PolymarketClient
+from config import MIN_LIQUIDITY_USD, MAX_SPREAD_PCT, SCAN_LIMIT
 
-def run_scan(min_liquidity: float = 1000.0, max_spread: float = 0.1, limit: int = 50) -> list:
+def run_scan(min_liquidity: float = MIN_LIQUIDITY_USD, max_spread: float = MAX_SPREAD_PCT, limit: int = SCAN_LIMIT) -> list:
     client = PolymarketClient()
     raw = client.fetch_markets(limit=limit)
     out = []

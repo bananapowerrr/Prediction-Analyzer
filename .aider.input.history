@@ -569,3 +569,11 @@
 +  GAMMA_API_BASE = "https://gamma-api.polymarket.com"
 +
 +  Delete OLLAMA_MODEL, RPC_URLS and any other lines. No git.
+
+# 2026-08-26 11:47:09.225455
++Контекст: проект `desktop-tutorial`. Корень git: D:\Workspace\desktop-tutorial. Работай ТОЛЬКО внутри этой папки. AgentBus на G:\Мой диск\AgentBus — НЕ часть проекта. Не создавай вложенную копию репозитория. НЕ выполняй git add/commit/push — это сделает диспетчер после проверки. Задача: 1) In data/polymarket_client.py: import GAMMA_API_BASE from config; use it as BASE (class attribute or __init__).
++  2) In data/scanner.py: import MIN_LIQUIDITY_USD, MAX_SPREAD_PCT, SCAN_LIMIT from config;
++     use them as defaults for run_scan(min_liquidity=..., max_spread=..., limit=...).
++     Keep names: if config has MIN_LIQUIDITY_USD use that; MAX_SPREAD_PCT; SCAN_LIMIT.
++  3) In main.py status message print "scanner ready" (lowercase).
++  Keep existing behavior otherwise. No git.

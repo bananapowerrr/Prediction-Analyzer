@@ -1,7 +1,8 @@
 import requests
+from config import GAMMA_API_BASE
 
 class PolymarketClient:
-    BASE = "https://gamma-api.polymarket.com"
+    BASE = GAMMA_API_BASE
     
     def __init__(self, timeout: float = 30.0):
         self.timeout = timeout
