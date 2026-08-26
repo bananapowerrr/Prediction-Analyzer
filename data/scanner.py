@@ -1,6 +1,6 @@
 import logging
 from core.models import Market
-from data.filters import passes_liquidity_gate, passes_spread_gate, passes_volume_gate
+from data.filters import passes_liquidity_gate, passes_spread_gate, passes_volume_gate, passes_all_gates
 from data.polymarket_client import PolymarketClient
 from config import MIN_LIQUIDITY_USD, MAX_SPREAD_PCT, SCAN_LIMIT, MIN_VOLUME_24H
 
@@ -29,7 +29,7 @@ def run_scan(min_liquidity: float = MIN_LIQUIDITY_USD, max_spread: float = MAX_S
             spread=_f(item.get("spread", 0)),
             volume_24h=_f(item.get("volume_24h", item.get("volume24hr", 0))),
         )
-        if passes_liquidity_gate(m, min_liquidity) and passes_spread_gate(m, max_spread) and passes_volume_gate(m, min_volume):
+        if passes_all_gates(m, min_liquidity, max_spread, min_volume):
             out.append(m)
     logger.info("passed filters: %s", len(out))
     out.sort(key=lambda m: m.liquidity, reverse=True)
