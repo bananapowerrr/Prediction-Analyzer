@@ -3,3 +3,4 @@ MAX_SPREAD_PCT = 0.1
 SCAN_LIMIT = 50
 GAMMA_API_BASE = "https://gamma-api.polymarket.com"
 MIN_VOLUME_24H = 0.0
+HTTP_TIMEOUT = 30.0

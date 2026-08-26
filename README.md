@@ -1,3 +1,3 @@
-# Prediction Analyzer
+# Прогнозный анализатор
 
-A machine learning model prediction analysis tool
+Программа для анализа прогнозов машинного обучения
