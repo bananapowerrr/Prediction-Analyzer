@@ -27,4 +27,5 @@ def run_scan(min_liquidity: float = MIN_LIQUIDITY_USD, max_spread: float = MAX_S
         )
         if passes_liquidity_gate(m, min_liquidity) and passes_spread_gate(m, max_spread):
             out.append(m)
+    out.sort(key=lambda m: m.liquidity, reverse=True)
     return out
