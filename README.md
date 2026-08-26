@@ -1,1 +1,3 @@
-# Prediction Analyzer\n# A machine learning model prediction analysis tool
+# Prediction Analyzer
+
+A machine learning model prediction analysis tool
