@@ -11,6 +11,7 @@ def main() -> None:
     parser.add_argument("--min-volume", type=float, default=MIN_VOLUME_24H, help="Minimum volume in 24 hours")
     parser.add_argument("--limit", type=int, default=SCAN_LIMIT, help="Limit of markets to scan")
     parser.add_argument("--json", action="store_true", help="Output results in JSON format")
+    parser.add_argument("--top", type=int, default=20, help="Number of top markets to display")
     args = parser.parse_args()
 
     if args.command == "status":
@@ -32,7 +33,7 @@ def main() -> None:
         print(json.dumps(json_output, indent=4))
     else:
         print(f"Found {len(markets)} markets")
-        for m in markets[:20]:
+        for m in markets[:args.top]:
             print(f"Market: {m.question}")
 
 if __name__ == "__main__":
