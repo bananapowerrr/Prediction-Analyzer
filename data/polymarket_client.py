@@ -1,1 +1,20 @@
-Контекст: корень git-репозитория (имя репы desktop-tutorial) — сама папка D:\Workspace. Папки шины incoming/done/errors лежат в G:\Мой диск\AgentBus, а НЕ в проекте. Задача: Create file data/polymarket_client.py with EXACTLY this text: 
+import requests
+
+class PolymarketClient:
+    BASE = "https://gamma-api.polymarket.com"
+    
+    def __init__(self, timeout: float = 30.0):
+        self.timeout = timeout
+    
+    def fetch_markets(self, limit: int = 50) -> list:
+        try:
+            r = requests.get(
+                f"{self.BASE}/markets",
+                params={"limit": limit, "active": "true", "closed": "false"},
+                timeout=self.timeout,
+            )
+            r.raise_for_status()
+            data = r.json()
+            return data if isinstance(data, list) else []
+        except requests.RequestException:
+            return []

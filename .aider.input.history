@@ -391,3 +391,24 @@
 +
 +--- Исправь и не повторяй ошибку. Git не трогай. ---
 +
+
+# 2026-08-26 11:29:59.055285
++Контекст: проект `desktop-tutorial`. Корень git: D:\Workspace\desktop-tutorial. Работай ТОЛЬКО внутри этой папки. AgentBus на G:\Мой диск\AgentBus — НЕ часть проекта. Не создавай вложенную копию репозитория. НЕ выполняй git add/commit/push — это сделает диспетчер после проверки. Задача: Rewrite data/polymarket_client.py completely.
++  import requests
++  class PolymarketClient:
++      BASE = "https://gamma-api.polymarket.com"
++      def __init__(self, timeout: float = 30.0):
++          self.timeout = timeout
++      def fetch_markets(self, limit: int = 50) -> list:
++          try:
++              r = requests.get(
++                  f"{self.BASE}/markets",
++                  params={"limit": limit, "active": "true", "closed": "false"},
++                  timeout=self.timeout,
++              )
++              r.raise_for_status()
++              data = r.json()
++              return data if isinstance(data, list) else []
++          except requests.RequestException:
++              return []
++  No git.
