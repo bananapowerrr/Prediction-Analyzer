@@ -29,10 +29,59 @@ DEFAULT_DB = os.environ.get(
     "WORLD_STATE_DB", os.path.join(PROJECT_ROOT, "world_state.db")
 )
 
+THEMES = ["light", "dark"]
+
+THEME_FILE = os.path.join(PROJECT_ROOT, ".ui_theme.json")
+
+
+def load_theme() -> str:
+    try:
+        with open(THEME_FILE, "r", encoding="utf-8") as fh:
+            data = json.load(fh)
+        theme = data.get("theme")
+        if theme in THEMES:
+            return theme
+    except Exception:
+        pass
+    return "light"
+
+
+def save_theme(theme: str) -> None:
+    try:
+        with open(THEME_FILE, "w", encoding="utf-8") as fh:
+            json.dump({"theme": theme}, fh)
+    except Exception:
+        pass
+
+
+def apply_theme(theme: str) -> None:
+    """Inject minimal light/dark styling via CSS."""
+    if theme == "dark":
+        bg, fg, panel = "#0e1117", "#fafafa", "#161b22"
+    else:
+        bg, fg, panel = "#ffffff", "#0e1117", "#f0f2f6"
+    css = f"""
+    <style>
+        .stApp {{ background-color: {bg}; color: {fg}; }}
+        .stApp header, .stApp .css-18e3h3g {{ background-color: {bg}; }}
+        .stSidebar, section[data-testid="stSidebar"] {{
+            background-color: {panel}; color: {fg};
+        }}
+        .stDataFrame {{ background-color: {panel}; }}
+    </style>
+    """
+    st.markdown(css, unsafe_allow_html=True)
+
+
+def notify(message: str, icon: str = "ℹ️") -> None:
+    """Show a transient toast; degrade silently if unavailable."""
+    try:
+        st.toast(message, icon=icon)
+    except Exception:
+        pass
 
 def open_manager(db_path: str):
     return StateManager(db_path)
-
 
 def parse_payload(raw):
     if raw is None:
@@ -49,7 +98,6 @@ def parse_payload(raw):
     except Exception:
         return {"raw": text}
 
-
 def load_events(manager, event_type=None, limit=500):
     try:
         rows = manager.get_events(event_type)
@@ -59,7 +107,6 @@ def load_events(manager, event_type=None, limit=500):
         return []
     rows = list(reversed(rows))
     return rows[:limit]
-
 
 def events_dataframe(events):
     records = []
@@ -76,7 +123,6 @@ def events_dataframe(events):
         records.append(row)
     return pd.DataFrame(records)
 
-
 def status_color(status: str) -> str:
     s = (status or "").lower()
     if s in ("filled", "executed", "completed", "done"):
@@ -87,7 +133,6 @@ def status_color(status: str) -> str:
         return "🔴"
     return "⚪"
 
-
 def render_market_events(events):
     if not events:
         st.info("Нет рыночных событий в World State. Запустите сканирование или сгенерируйте демо-данные.")
@@ -97,7 +142,6 @@ def render_market_events(events):
     if "timestamp" in df.columns:
         df = df.sort_values("timestamp", ascending=False)
     st.dataframe(df, use_container_width=True, height=360)
-
 
 def render_tribunal(events):
     st.subheader("Логи дебатов LLM-агентов (Tribunal)")
@@ -133,7 +177,6 @@ def render_tribunal(events):
                 except Exception:
                     pass
 
-
 def render_edge(events):
     st.subheader("Рассчитанный Edge")
     if not events:
@@ -158,7 +201,6 @@ def render_edge(events):
     numeric = pd.to_numeric(df["edge"], errors="coerce").dropna()
     if not numeric.empty:
         st.bar_chart(numeric.rename("edge"))
-
 
 def render_orders(events):
     st.subheader("Статусы исполнения ордеров")
@@ -185,7 +227,6 @@ def render_orders(events):
     df = pd.DataFrame(rows)
     df = df.sort_values("timestamp", ascending=False) if "timestamp" in df.columns else df
     st.dataframe(df, use_container_width=True, height=300)
-
 
 def seed_demo_data(manager):
     base = datetime.now()
@@ -246,8 +287,10 @@ def seed_demo_data(manager):
         "status": "pending",
     })
 
-
 def main():
+    current_theme = load_theme()
+    apply_theme(current_theme)
+
     st.title("📊 Desktop Tutorial — Trading Terminal Monitor")
 
     with st.sidebar:
@@ -255,7 +298,16 @@ def main():
         db_path = st.text_input("Путь к БД World State", value=DEFAULT_DB)
         auto_refresh = st.checkbox("Авто-обновление", value=True)
         refresh_interval = st.slider("Интервал (сек)", 1, 30, 5)
+        theme = st.selectbox(
+            "Тема оформления", THEMES, index=THEMES.index(current_theme),
+            key="theme_select",
+        )
+        if theme != current_theme:
+            save_theme(theme)
+            apply_theme(theme)
+            notify(f"Тема оформления изменена: {theme}", icon="🎨")
         if st.button("🔄 Обновить сейчас"):
+            notify("Данные терминала обновлены", icon="🔄")
             st.rerun()
         st.divider()
         if st.button("Сгенерировать демо-данные"):
@@ -263,7 +315,7 @@ def main():
                 mgr = open_manager(db_path)
                 seed_demo_data(mgr)
                 mgr.close()
-            st.success("Демо-данные записаны.")
+            notify("Демо-данные записаны в World State", icon="✅")
             st.rerun()
 
     try:
@@ -271,6 +323,7 @@ def main():
         conn_ok = True
     except Exception as exc:
         st.error(f"Не удалось открыть БД World State: {exc}")
+        notify(f"Ошибка открытия БД World State: {exc}", icon="⚠️")
         return
 
     market_events = load_events(manager, MARKET_EVENT)
@@ -302,7 +355,6 @@ def main():
     if auto_refresh:
         time.sleep(refresh_interval)
         st.rerun()
-
 
 if __name__ == "__main__":
     main()

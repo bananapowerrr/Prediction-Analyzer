@@ -22,6 +22,43 @@ class OrderValidationError(ValueError):
     """Raised when an order fails payload validation."""
 
 
+class LiquidityGateError(OrderExecutorError):
+    """Raised when an order is rejected by the risk engine liquidity gate."""
+
+
+# A risk checker is a callable ``(order, market_liquidity) -> None`` that raises
+# :class:`LiquidityGateError` (or any exception) when the order must be blocked.
+RiskChecker = "Callable[[Order, Optional[float]], None]"
+
+
+def make_liquidity_gate(min_liquidity: float) -> "RiskChecker":
+    """Build a risk checker that enforces the Liquidity Gate via ``risk_engine``.
+
+    The returned callable raises :class:`LiquidityGateError` when the order's
+    market liquidity is known and falls below ``min_liquidity``. It is a no-op
+    when liquidity is not supplied (``None``), so callers that cannot resolve
+    liquidity at submit time are not forced to fail.
+    """
+    def _gate(order: Order, market_liquidity: "Optional[float]") -> None:
+        if market_liquidity is None:
+            return
+        from risk_engine import Market as RiskMarket, passes_liquidity_gate
+
+        market = RiskMarket(
+            id=order.market_id,
+            liquidity=float(market_liquidity),
+            spread=0.0,
+            volume=0.0,
+        )
+        if not passes_liquidity_gate(market, min_liquidity):
+            raise LiquidityGateError(
+                f"Liquidity gate rejected {order.order_id}: liquidity "
+                f"{market_liquidity:.2f} <= min {min_liquidity:.2f}"
+            )
+
+    return _gate
+
+
 class OrderExecutor:
     """Executes orders against the Polymarket CLOB REST API.
 
@@ -37,6 +74,7 @@ class OrderExecutor:
         session: Optional[Any] = None,
         max_retries: int = DEFAULT_MAX_RETRIES,
         backoff_base: float = DEFAULT_BACKOFF_BASE,
+        risk_checker: "Optional[RiskChecker]" = None,
     ) -> None:
         if not api_key:
             raise OrderValidationError("api_key is required")
@@ -50,6 +88,7 @@ class OrderExecutor:
         self._session = session
         self.max_retries = max_retries
         self.backoff_base = backoff_base
+        self.risk_checker = risk_checker
 
     async def _get_session(self) -> Any:
         if self._session is None:
@@ -94,6 +133,26 @@ class OrderExecutor:
         if order.maker:
             payload["maker"] = order.maker
         return payload
+
+    # --------------------------------------------------- additional validation
+    def validate_order(self, order: Order) -> None:
+        """Run extended parameter validation before sending to CLOB.
+
+        This complements :meth:`_build_payload` with trading-specific rules:
+        prices must sit on Polymarket's 1-cent tick grid and order size must be
+        within sane bounds. Raises :class:`OrderValidationError` on violation.
+        """
+        if not isinstance(order, Order):
+            raise OrderValidationError("order must be an Order instance")
+        # Polymarket quotes prices in cents, so enforce a 0.01 tick grid.
+        if round(order.price, 2) != order.price:
+            raise OrderValidationError(
+                f"price {order.price} must be on a 0.01 tick grid"
+            )
+        if order.size > 1_000_000:
+            raise OrderValidationError(
+                f"size {order.size} exceeds the maximum allowed (1_000_000)"
+            )
 
     # ----------------------------------------------------------------- requests
     def _backoff_delay(self, attempt: int, retry_after: Optional[float]) -> float:
@@ -179,7 +238,12 @@ class OrderExecutor:
             return None
 
     # ------------------------------------------------------------------- public
-    async def submit_order(self, order: Order) -> Dict[str, Any]:
+    async def submit_order(
+        self, order: Order, market_liquidity: "Optional[float]" = None
+    ) -> Dict[str, Any]:
+        self.validate_order(order)
+        if self.risk_checker is not None:
+            self.risk_checker(order, market_liquidity)
         payload = self._build_payload(order)
         url = f"{self.clob_base}/order"
         headers = {"Authorization": f"Bearer {self.api_key}"}
