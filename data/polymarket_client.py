@@ -8,10 +8,14 @@ class PolymarketClient:
         self.timeout = timeout
     
     def fetch_markets(self, limit: int = 50) -> list:
+        headers = {
+            "User-Agent": "desktop-tutorial/0.1"
+        }
         try:
             r = requests.get(
                 f"{self.BASE}/markets",
                 params={"limit": limit, "active": "true", "closed": "false"},
+                headers=headers,
                 timeout=self.timeout,
             )
             r.raise_for_status()
