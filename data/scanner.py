@@ -113,6 +113,11 @@ class PolymarketScanner(MarketScanner):
         return 0.0
 
 
+def filter_by_volume_threshold(markets: List[Market], min_volume: float) -> List[Market]:
+    """Return markets whose 24h volume is at least ``min_volume``."""
+    return [m for m in markets if m.volume_24h >= min_volume]
+
+
 def scan_markets(
     min_liquidity: Optional[float] = None,
     max_spread: Optional[float] = None,
