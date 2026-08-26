@@ -1,2 +1,6 @@
-﻿OLLAMA_MODEL = 
-gpt-4\nRPC_URLS = [https://rpc.ankr.com/eth,https://rpc.ankr.com/eth/infura]\nMIN_LIQUIDITY_USD = 50000\nMAX_SPREAD_PCT = 0.05\nMIN_EDGE = 0.05
+OLLAMA_MODEL = "gpt-4"
+RPC_URLS = ["https://rpc.ankr.com/eth", "https://rpc.ankr.com/eth/infura"]
+MIN_LIQUIDITY_USD = 1000.0
+MAX_SPREAD_PCT = 0.1
+SCAN_LIMIT = 50
+GAMMA_API_BASE = "https://gamma-api.polymarket.com"

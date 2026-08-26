@@ -530,3 +530,13 @@
 +
 +--- Исправь и не повторяй ошибку. Git не трогай. ---
 +
+
+# 2026-08-26 11:42:51.186227
++Контекст: проект `desktop-tutorial`. Корень git: D:\Workspace\desktop-tutorial. Работай ТОЛЬКО внутри этой папки. AgentBus на G:\Мой диск\AgentBus — НЕ часть проекта. Не создавай вложенную копию репозитория. НЕ выполняй git add/commit/push — это сделает диспетчер после проверки. Задача: Rewrite config.py completely as valid UTF-8 Python:
++
++  MIN_LIQUIDITY = 1000.0
++  MAX_SPREAD = 0.1
++  SCAN_LIMIT = 50
++  GAMMA_API_BASE = "https://gamma-api.polymarket.com"
++
++  Nothing else. No git.
