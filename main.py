@@ -1,9 +1,13 @@
 import argparse
 import json
+import logging
 from data.scanner import run_scan
 from config import MIN_LIQUIDITY_USD, MAX_SPREAD_PCT, SCAN_LIMIT, MIN_VOLUME_24H
 
 def main() -> None:
+    if not logging.getLogger().hasHandlers():
+        logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+
     parser = argparse.ArgumentParser(description="Desktop Tutorial Scanner")
     parser.add_argument("command", nargs="?", default="scan", choices=["scan", "status"], help="Command to execute")
     parser.add_argument("--min-liquidity", type=float, default=MIN_LIQUIDITY_USD, help="Minimum liquidity in USD")
