@@ -8,5 +8,6 @@ venv/
 .mypy_cache/
 .aider*
 .aider.tags.cache.v4/
-test_aider.txt
-test_push_*.txt
+.vibe/
+test_*.txt
+nemotron_test.txt

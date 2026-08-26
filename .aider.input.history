@@ -540,3 +540,22 @@
 +  GAMMA_API_BASE = "https://gamma-api.polymarket.com"
 +
 +  Nothing else. No git.
+
+# 2026-08-26 11:46:15.501892
++Контекст: проект `desktop-tutorial`. Корень git: D:\Workspace\desktop-tutorial. Работай ТОЛЬКО внутри этой папки. AgentBus на G:\Мой диск\AgentBus — НЕ часть проекта. Не создавай вложенную копию репозитория. НЕ выполняй git add/commit/push — это сделает диспетчер после проверки. Задача: Rewrite .gitignore completely (UTF-8, no BOM) with exactly:
++
++  __pycache__/
++  *.py[cod]
++  .env
++  .venv/
++  venv/
++  *.egg-info/
++  .pytest_cache/
++  .mypy_cache/
++  .aider*
++  .aider.tags.cache.v4/
++  .vibe/
++  test_*.txt
++  nemotron_test.txt
++
++  No other changes. No git.
