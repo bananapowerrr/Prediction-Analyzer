@@ -11,3 +11,7 @@ venv/
 .vibe/
 test_*.txt
 nemotron_test.txt
+
+# telemetry logs
+telemetry_logs/
+*.log

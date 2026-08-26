@@ -26,14 +26,14 @@ class StateManager:
         self.conn.commit()
 
     def get_events(self, event_type: str = None) -> List[Dict]:
-        query = 'SELECT * FROM world_state'
         if event_type:
-            query += f' WHERE event_type = ?'
-            self.cursor.execute(query, (event_type,))
+            self.cursor.execute(
+                'SELECT * FROM world_state WHERE event_type = ?', (event_type,)
+            )
         else:
-            self.cursor.execute(query)
-        rows = self.cursor.fetchall()
-        return [dict(row) for row in rows]
+            self.cursor.execute('SELECT * FROM world_state')
+        columns = [col[0] for col in self.cursor.description]
+        return [dict(zip(columns, row)) for row in self.cursor.fetchall()]
 
     def close(self):
         self.conn.close()
