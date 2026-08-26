@@ -302,3 +302,15 @@
 +  Добавь from __future__ import annotations
 +  from dataclasses import dataclass
 +  Только это, без лишнего кода. Git не выполняй.
+
+# 2026-08-26 11:27:23.208569
++Контекст: проект `desktop-tutorial`. Корень git: D:\Workspace\desktop-tutorial. Работай ТОЛЬКО внутри этой папки. AgentBus на G:\Мой диск\AgentBus — НЕ часть проекта. Не создавай вложенную копию репозитория. НЕ выполняй git add/commit/push — это сделает диспетчер после проверки. Задача: Перепиши core/models.py. Нужен dataclass Market со полями:
++  - id: str
++  - question: str
++  - liquidity: float
++  - spread: float
++  - volume_24h: float = 0.0
++
++  Добавь from __future__ import annotations
++  from dataclasses import dataclass
++  Только это, без лишнего кода. Git не выполняй.
