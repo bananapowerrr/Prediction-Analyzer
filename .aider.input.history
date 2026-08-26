@@ -559,3 +559,13 @@
 +  nemotron_test.txt
 +
 +  No other changes. No git.
+
+# 2026-08-26 11:46:39.751962
++Контекст: проект `desktop-tutorial`. Корень git: D:\Workspace\desktop-tutorial. Работай ТОЛЬКО внутри этой папки. AgentBus на G:\Мой диск\AgentBus — НЕ часть проекта. Не создавай вложенную копию репозитория. НЕ выполняй git add/commit/push — это сделает диспетчер после проверки. Задача: Rewrite config.py to ONLY these constants (valid Python UTF-8):
++
++  MIN_LIQUIDITY_USD = 1000.0
++  MAX_SPREAD_PCT = 0.1
++  SCAN_LIMIT = 50
++  GAMMA_API_BASE = "https://gamma-api.polymarket.com"
++
++  Delete OLLAMA_MODEL, RPC_URLS and any other lines. No git.
