@@ -30,6 +30,28 @@ class ConnectionSettings(BaseSettings):
     scan_limit: int = 50
 
 
+class CloudTierSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="CLOUD_")
+
+    groq_api_key: str = ""
+    groq_model: str = "llama-3.3-70b-versatile"
+    gemini_api_key: str = ""
+    gemini_model: str = "gemini-2.0-flash"
+    openrouter_api_key: str = ""
+    openrouter_model: str = "meta-llama/llama-3.3-70b-versatile"
+    timeout: float = 30.0
+    max_concurrent: int = 5
+
+
+class LocalTierSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="LOCAL_")
+
+    ollama_base_url: str = "http://localhost:11434"
+    judge_model: str = "qwen2.5-coder:7b"
+    timeout: float = 120.0
+    temperature: float = 0.3
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -41,6 +63,8 @@ class Settings(BaseSettings):
     liquidity_gate: LiquidityGateSettings = LiquidityGateSettings()
     spread: SpreadSettings = SpreadSettings()
     connection: ConnectionSettings = ConnectionSettings()
+    cloud: CloudTierSettings = CloudTierSettings()
+    local: LocalTierSettings = LocalTierSettings()
 
 
 settings = Settings()
@@ -55,3 +79,17 @@ HTTP_TIMEOUT = settings.connection.http_timeout
 
 
 config = settings
+
+CLOUD_GROQ_API_KEY = settings.cloud.groq_api_key
+CLOUD_GROQ_MODEL = settings.cloud.groq_model
+CLOUD_GEMINI_API_KEY = settings.cloud.gemini_api_key
+CLOUD_GEMINI_MODEL = settings.cloud.gemini_model
+CLOUD_OPENROUTER_API_KEY = settings.cloud.openrouter_api_key
+CLOUD_OPENROUTER_MODEL = settings.cloud.openrouter_model
+CLOUD_TIMEOUT = settings.cloud.timeout
+CLOUD_MAX_CONCURRENT = settings.cloud.max_concurrent
+
+LOCAL_OLLAMA_BASE_URL = settings.local.ollama_base_url
+LOCAL_JUDGE_MODEL = settings.local.judge_model
+LOCAL_TIMEOUT = settings.local.timeout
+LOCAL_TEMPERATURE = settings.local.temperature
