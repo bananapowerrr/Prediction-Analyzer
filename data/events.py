@@ -11,6 +11,13 @@ class BlockchainEvent(BaseModel):
     data: dict
     timestamp: float = Field(default_factory=float)
 
+class MarketEvent(BaseModel):
+    symbol: str
+    timestamp: float
+    price: float
+    volume: float
+    source: str
+
 class ChainMetric(BaseModel):
     metric_name: str
     value: float
