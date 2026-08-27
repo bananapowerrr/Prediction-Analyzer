@@ -5,16 +5,50 @@ class RpcSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="RPC_")
 
     endpoint: str = "https://polygon-rpc.com"
+    endpoints: str = ""
     chain_id: int = 137
     private_key: str = ""
+    cooldown_seconds: float = 60.0
+    max_retries: int = 3
+    timeout_seconds: float = 10.0
+    request_timeout: float = 30.0
+
+    @property
+    def endpoint_list(self) -> list:
+        primary = [self.endpoint] if self.endpoint else []
+        extra = [e.strip() for e in self.endpoints.split(",") if e.strip()]
+        seen: dict = {}
+        result = []
+        for ep in primary + extra:
+            if ep not in seen:
+                seen[ep] = True
+                result.append(ep)
+        return result or [self.endpoint]
 
 
 class BaseRpcSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="BASE_RPC_")
 
     endpoint: str = "https://mainnet.base.org"
+    endpoints: str = ""
     chain_id: int = 8453
     private_key: str = ""
+    cooldown_seconds: float = 60.0
+    max_retries: int = 3
+    timeout_seconds: float = 10.0
+    request_timeout: float = 30.0
+
+    @property
+    def endpoint_list(self) -> list:
+        primary = [self.endpoint] if self.endpoint else []
+        extra = [e.strip() for e in self.endpoints.split(",") if e.strip()]
+        seen: dict = {}
+        result = []
+        for ep in primary + extra:
+            if ep not in seen:
+                seen[ep] = True
+                result.append(ep)
+        return result or [self.endpoint]
 
 
 class LiquidityGateSettings(BaseSettings):
@@ -92,6 +126,16 @@ config = settings
 BASE_RPC_ENDPOINT = settings.base_rpc.endpoint
 BASE_RPC_CHAIN_ID = settings.base_rpc.chain_id
 BASE_RPC_PRIVATE_KEY = settings.base_rpc.private_key
+
+RPC_ENDPOINTS = settings.rpc.endpoint_list
+RPC_CHAIN_ID = settings.rpc.chain_id
+RPC_COOLDOWN = settings.rpc.cooldown_seconds
+RPC_MAX_RETRIES = settings.rpc.max_retries
+RPC_TIMEOUT = settings.rpc.timeout_seconds
+RPC_REQUEST_TIMEOUT = settings.rpc.request_timeout
+
+BASE_RPC_ENDPOINTS = settings.base_rpc.endpoint_list
+BASE_RPC_COOLDOWN = settings.base_rpc.cooldown_seconds
 
 CLOUD_GROQ_API_KEY = settings.cloud.groq_api_key
 CLOUD_GROQ_MODEL = settings.cloud.groq_model
