@@ -1,7 +1,3 @@
-import os
-import json
-from datetime import datetime
-import logging
 import sqlite3
 from typing import Dict, List
 
@@ -13,36 +9,41 @@ class PersistenceManager:
         self._create_table()
 
     def _create_table(self):
-        self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS events (
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS reports (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                event_type TEXT,
-                data TEXT
+                report_type TEXT NOT NULL,
+                data TEXT NOT NULL
             )
-        """)
+        ''')
         self.conn.commit()
 
     def save_event(self, event_type: str, data: Dict):
-        try:
-            self.cursor.execute("INSERT INTO events (event_type, data) VALUES (?, ?)", (event_type, json.dumps(data)))
-            self.conn.commit()
-        except Exception as e:
-            logging.error(f"Error saving event: {e}")
-            PersistenceManager.save_event("error", {"message": str(e)})
+        self.cursor.execute('INSERT INTO reports (report_type, data) VALUES (?, ?)', (event_type, str(data)))
+        self.conn.commit()
 
     def get_events(self, event_type: str = None) -> List[Dict]:
-        try:
-            if event_type:
-                self.cursor.execute("SELECT * FROM events WHERE event_type = ?", (event_type,))
-            else:
-                self.cursor.execute("SELECT * FROM events")
-            rows = self.cursor.fetchall()
-            return [dict(row) for row in rows]
-        except Exception as e:
-            logging.error(f"Error loading events: {e}")
-            PersistenceManager.save_event("error", {"message": str(e)})
-            return []
+        query = 'SELECT data FROM reports'
+        if event_type:
+            query += f' WHERE report_type = ?'
+            self.cursor.execute(query, (event_type,))
+        else:
+            self.cursor.execute(query)
+        results = self.cursor.fetchall()
+        return [dict(row) for row in results]
 
-    def close(self):
-        self.conn.close()
+    def save_report(self, report_type: str, data: Dict):
+        self.cursor.execute('INSERT INTO reports (report_type, data) VALUES (?, ?)', (report_type, str(data)))
+        self.conn.commit()
+
+    def get_report(self, report_type: str) -> Dict:
+        self.cursor.execute('SELECT data FROM reports WHERE report_type = ?', (report_type,))
+        result = self.cursor.fetchone()
+        if result:
+            return dict(result)
+        return None
+
+    def get_all_reports(self) -> List[Dict]:
+        self.cursor.execute('SELECT * FROM reports')
+        results = self.cursor.fetchall()
+        return [dict(row) for row in results]
