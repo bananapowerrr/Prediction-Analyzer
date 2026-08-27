@@ -1,6 +1,6 @@
 from __future__ import annotations
-from dataclasses import dataclass
-from typing import Optional
+from dataclasses import dataclass, field
+from typing import Dict, Optional
 
 
 @dataclass
@@ -41,3 +41,24 @@ class Market:
 
     def __repr__(self) -> str:
         return f"Market(id={self.id}, liquidity={self.liquidity}, spread={self.spread})"
+
+
+@dataclass
+class QuantitativeSignal:
+    action: str
+    confidence: float
+    indicators: Dict[str, float] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if self.action not in ("buy", "sell", "hold"):
+            raise ValueError("action must be 'buy', 'sell', or 'hold'")
+        if not isinstance(self.confidence, (int, float)):
+            raise ValueError("confidence must be a number")
+        if not 0.0 <= self.confidence <= 1.0:
+            raise ValueError("confidence must be in the range [0, 1]")
+
+    def __repr__(self) -> str:
+        return (
+            f"QuantitativeSignal(action={self.action}, "
+            f"confidence={self.confidence}, indicators={self.indicators})"
+        )
