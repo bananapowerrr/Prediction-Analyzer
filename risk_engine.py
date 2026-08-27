@@ -44,7 +44,10 @@ def calculate_expected_value(market: Market, outcome_probabilities: Dict[str, fl
 def calculate_fractional_kelly(market: Market, outcome_probabilities: Dict[str, float]) -> float:
     ev = calculate_expected_value(market, outcome_probabilities)
     risk_free_rate = 0.01  # Примерный риск-фрийный процент
-    kelly_fraction = (ev - risk_free_rate * market.liquidity) / (market.spread * market.liquidity)
+    denominator = market.spread * market.liquidity
+    if denominator == 0:
+        return 0.0
+    kelly_fraction = (ev - risk_free_rate * market.liquidity) / denominator
     return max(0, min(1, kelly_fraction))
 
 def determine_position_size(market: Market, outcome_probabilities: Dict[str, float], initial_capital: float) -> float:
