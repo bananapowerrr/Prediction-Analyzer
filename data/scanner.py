@@ -1,8 +1,9 @@
 from typing import List, Dict, Optional
 from dataclasses import dataclass
-from core.models import Market
+from core.models import Market, MarketSchema
 from data.filters import passes_all_gates
 import logging
+from pydantic import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ class MarketScanner:
     
     Subclasses must implement :meth:`fetch_raw` (retrieve raw records from a
     data source) and :meth:`parse` (convert raw records into ``Market`` 
-models).
+    models).
     The :meth:`scan` method fetches, parses and applies the liquidity/spread/
     volume gates defined in ``data.filters``.
     """
@@ -29,7 +30,16 @@ models).
         raise NotImplementedError("Subclasses must implement this method")
     
     def parse(self, raw: list) -> List[Market]:
-        raise NotImplementedError("Subclasses must implement this method")
+        markets: List[Market] = []
+        for i, record in enumerate(raw):
+            try:
+                schema = MarketSchema(**record)
+                markets.append(schema.to_market())
+            except ValidationError as e:
+                logger.warning("Skipping invalid market record #%d: %s", i, e.errors()[0]["msg"])
+            except Exception as e:
+                logger.warning("Skipping malformed market record #%d: %s", i, e)
+        return markets
     
     def filter_markets(self, markets: List[Market]) -> List[Market]:
         if self.scan_config.min_liquidity is not None:

@@ -1,6 +1,8 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Dict, Optional
+from typing import Dict, Optional, List
+
+from pydantic import BaseModel, Field, field_validator
 
 
 @dataclass
@@ -62,3 +64,103 @@ class QuantitativeSignal:
             f"QuantitativeSignal(action={self.action}, "
             f"confidence={self.confidence}, indicators={self.indicators})"
         )
+
+
+class RawMarketData(BaseModel):
+    id: str
+    question: str
+    liquidity: float = Field(ge=0)
+    spread: float = Field(ge=0)
+    volume_24h: float = Field(default=0.0, ge=0)
+
+    @field_validator("id")
+    @classmethod
+    def id_not_empty(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("id must not be empty")
+        return v.strip()
+
+    @field_validator("question")
+    @classmethod
+    def question_not_empty(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("question must not be empty")
+        return v.strip()
+
+
+class MarketSchema(BaseModel):
+    id: str
+    question: str
+    liquidity: float = Field(ge=0)
+    spread: float = Field(ge=0, le=1)
+    volume_24h: float = Field(default=0.0, ge=0)
+
+    def to_market(self) -> Market:
+        return Market(
+            id=self.id,
+            question=self.question,
+            liquidity=self.liquidity,
+            spread=self.spread,
+            volume_24h=self.volume_24h,
+        )
+
+
+class OrderSchema(BaseModel):
+    order_id: str
+    market_id: str
+    side: str
+    size: float = Field(gt=0)
+    price: float = Field(gt=0, le=1)
+    maker: Optional[str] = None
+
+    @field_validator("side")
+    @classmethod
+    def side_valid(cls, v: str) -> str:
+        if v not in ("buy", "sell"):
+            raise ValueError("side must be 'buy' or 'sell'")
+        return v
+
+    def to_order(self) -> Order:
+        return Order(
+            order_id=self.order_id,
+            market_id=self.market_id,
+            side=self.side,
+            size=self.size,
+            price=self.price,
+            maker=self.maker,
+        )
+
+
+class QuantitativeSignalSchema(BaseModel):
+    action: str
+    confidence: float = Field(ge=0, le=1)
+    indicators: Dict[str, float] = Field(default_factory=dict)
+
+    @field_validator("action")
+    @classmethod
+    def action_valid(cls, v: str) -> str:
+        if v not in ("buy", "sell", "hold"):
+            raise ValueError("action must be 'buy', 'sell', or 'hold'")
+        return v
+
+    def to_signal(self) -> QuantitativeSignal:
+        return QuantitativeSignal(
+            action=self.action,
+            confidence=self.confidence,
+            indicators=self.indicators,
+        )
+
+
+def validate_market_data(data: Dict) -> Market:
+    schema = MarketSchema(**data)
+    return schema.to_market()
+
+
+def validate_order_data(data: Dict) -> Order:
+    schema = OrderSchema(**data)
+    return schema.to_order()
+
+
+def validate_signal_data(data: Dict) -> QuantitativeSignal:
+    schema = QuantitativeSignalSchema(**data)
+    return schema.to_signal()
