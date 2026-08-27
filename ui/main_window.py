@@ -1,10 +1,3 @@
-"""Базовый интерфейс главного окна терминала (Streamlit).
-
-Интегрирует переключатель темы из ``ui.theme`` и предоставляет каркас
-главного окна приложения: заголовок, боковую панель с настройками и
-основную область с вкладками мониторинга.
-"""
-
 import os
 import sys
 
@@ -21,6 +14,8 @@ DEFAULT_DB = os.environ.get(
     "WORLD_STATE_DB", os.path.join(PROJECT_ROOT, "world_state.db")
 )
 
+import logging
+from pathlib import Path
 
 def render_sidebar() -> dict:
     """Отрисовывает боковую панель и возвращает выбранные настройки."""
@@ -44,7 +39,6 @@ def render_sidebar() -> dict:
         "refresh_interval": refresh_interval,
     }
 
-
 def render_main_area() -> None:
     """Отрисовывает основную область главного окна."""
     st.subheader("Обзор терминала")
@@ -59,7 +53,6 @@ def render_main_area() -> None:
     with tab_logs:
         st.write("Здесь отображаются логи событий терминала.")
 
-
 def main() -> None:
     st.set_page_config(
         page_title=APP_TITLE,
@@ -68,9 +61,23 @@ def main() -> None:
     )
 
     st.title(f"🖥️ {APP_TITLE}")
-    render_sidebar()
-    render_main_area()
+    try:
+        sidebar_settings = render_sidebar()
+    except Exception as e:
+        logging.error(f"Error rendering sidebar: {e}")
+        Path("errors").mkdir(parents=True, exist_ok=True)
+        with open("errors/sidebar_error.log", "w") as f:
+            f.write(f"Error rendering sidebar: {e}")
+        return
 
+    try:
+        render_main_area()
+    except Exception as e:
+        logging.error(f"Error rendering main area: {e}")
+        Path("errors").mkdir(parents=True, exist_ok=True)
+        with open("errors/main_area_error.log", "w") as f:
+            f.write(f"Error rendering main area: {e}")
+        return
 
 if __name__ == "__main__":
     main()

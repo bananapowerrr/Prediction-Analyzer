@@ -3,6 +3,7 @@ import json
 import logging
 from data.scanner import run_scan
 from config import MIN_LIQUIDITY_USD, MAX_SPREAD_PCT, SCAN_LIMIT, MIN_VOLUME_24H
+from pathlib import Path
 
 def main() -> None:
     if not logging.getLogger().hasHandlers():
@@ -33,7 +34,14 @@ def main() -> None:
             print("scanner ready")
         return
 
-    markets = run_scan(min_liquidity=args.min_liquidity, max_spread=args.max_spread, min_volume=args.min_volume, limit=args.limit)
+    try:
+        markets = run_scan(min_liquidity=args.min_liquidity, max_spread=args.max_spread, min_volume=args.min_volume, limit=args.limit)
+    except Exception as e:
+        logging.error(f"Error during scan: {e}")
+        Path("errors").mkdir(parents=True, exist_ok=True)
+        with open("errors/scan_error.log", "w") as f:
+            f.write(f"Error during scan: {e}")
+        return
 
     if args.json:
         json_output = []
