@@ -9,6 +9,14 @@ class RpcSettings(BaseSettings):
     private_key: str = ""
 
 
+class BaseRpcSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="BASE_RPC_")
+
+    endpoint: str = "https://mainnet.base.org"
+    chain_id: int = 8453
+    private_key: str = ""
+
+
 class LiquidityGateSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="LIQUIDITY_")
 
@@ -60,6 +68,7 @@ class Settings(BaseSettings):
     )
 
     rpc: RpcSettings = RpcSettings()
+    base_rpc: BaseRpcSettings = BaseRpcSettings()
     liquidity_gate: LiquidityGateSettings = LiquidityGateSettings()
     spread: SpreadSettings = SpreadSettings()
     connection: ConnectionSettings = ConnectionSettings()
@@ -79,6 +88,10 @@ HTTP_TIMEOUT = settings.connection.http_timeout
 
 
 config = settings
+
+BASE_RPC_ENDPOINT = settings.base_rpc.endpoint
+BASE_RPC_CHAIN_ID = settings.base_rpc.chain_id
+BASE_RPC_PRIVATE_KEY = settings.base_rpc.private_key
 
 CLOUD_GROQ_API_KEY = settings.cloud.groq_api_key
 CLOUD_GROQ_MODEL = settings.cloud.groq_model
