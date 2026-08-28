@@ -49,6 +49,7 @@ class Telemetry:
         self._lock = threading.RLock()
         self._ensured = False
         self._counters = {}
+        self._last_scan_stats: Optional[Dict[str, Any]] = None
 
     # ------------------------------------------------------------------ #
     # Filesystem helpers
@@ -243,66 +244,6 @@ def _json_default(obj: Any) -> Any:
 # ---------------------------------------------------------------------- #
 # Hook installation
 # ---------------------------------------------------------------------- #
-_HOOK_INSTALLED = False
-
-
-def _make_exception_handler(
-    telemetry: Telemetry, reraise: bool = False
-) -> Callable[[Type[BaseException], BaseException, Optional[TracebackType]], None]:
-    def handle_exception(
-        exc_type: Type[BaseException],
-        exc_value: BaseException,
-        exc_traceback: Optional[TracebackType],
-    ) -> None:
-        try:
-            telemetry.log_exception(exc_type, exc_value, exc_traceback)
-        except Exception as hook_err:  # pragma: no cover - defensive
-            logger.critical("Telemetry hook failed: %s", hook_err, exc_info=True)
-        if reraise:
-            sys.__excepthook__(exc_type, exc_value, exc_traceback)
-
-    return handle_exception
-
-
-def install_exception_hook(
-    telemetry: Optional[Telemetry] = None,
-    log_dir: str = "telemetry_logs",
-    capture_threads: bool = True,
-) -> Telemetry:
-    """Install global unhandled-exception hooks.
-
-    Returns the ``Telemetry`` instance that was wired in (creating one if not
-    supplied). Idempotent: calling it twice will not add a second handler.
-    """
-    global _HOOK_INSTALLED
-    if telemetry is None:
-        telemetry = Telemetry(log_dir=log_dir)
-
-    if not _HOOK_INSTALLED:
-        sys.excepthook = _make_exception_handler(telemetry)
-        if capture_threads and hasattr(threading, "excepthook"):
-            threading.excepthook = lambda args: _make_exception_handler(
-                telemetry
-            )(args.exc_type, args.exc_value, args.exc_traceback)
-        _HOOK_INSTALLED = True
-        logger.info("Telemetry exception hook installed (log_dir=%r)", telemetry.log_dir)
-    return telemetry
-
-
-def setup(
-    log_dir: str = "telemetry_logs",
-    app_name: str = "desktop-tutorial",
-    capture_threads: bool = True,
-) -> Telemetry:
-    """Convenience entry point used by the host application."""
-    telemetry = Telemetry(log_dir=log_dir, app_name=app_name)
-    return install_exception_hook(
-        telemetry=telemetry, capture_threads=capture_threads
-    )
-
-# ---------------------------------------------------------------------- #
-# In-memory counter
-# ---------------------------------------------------------------------- #
     def inc(self, name: str) -> None:
         """Increment the counter for the given name."""
         with self._lock:
@@ -319,3 +260,18 @@ def setup(
         """Reset all counters."""
         with self._lock:
             self._counters.clear()
+
+    def record_scan(self, total: int, passed: int) -> None:
+        """Record the results of a scan."""
+        with self._lock:
+            self._last_scan_stats = {
+                "total": total,
+                "passed": passed,
+                "failed": total - passed,
+                "timestamp": _dt.datetime.now().isoformat(timespec="seconds"),
+            }
+
+    def last_scan_stats(self) -> Optional[Dict[str, Any]]:
+        """Get the statistics of the last scan."""
+        with self._lock:
+            return self._last_scan_stats
