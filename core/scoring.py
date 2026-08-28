@@ -19,4 +19,7 @@ def score_market(market, min_liquidity=100000, max_spread=0.01, min_volume_24h=1
     total_score = liquidity_score + spread_score + volume_score
     max_score = 3
 
+    if total_score == 0:
+        return 0
+
     return total_score / max_score
