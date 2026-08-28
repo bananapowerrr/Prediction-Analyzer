@@ -157,3 +157,4 @@ LOCAL_TEMPERATURE = settings.local.temperature
 
 APP_NAME = 'prediction-analyzer'
 APP_TITLE = 'Prediction Analyzer'
+APP_VERSION = '0.1.0'
