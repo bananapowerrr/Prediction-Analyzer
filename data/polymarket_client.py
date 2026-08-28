@@ -4,14 +4,13 @@ from typing import List, Optional, Dict
 
 import requests
 from pydantic import ValidationError
-from core.models import MarketSchema
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_TIMEOUT = 30.0
 
 class PolymarketClient:
-    """Клиент Gamma/Polymarket API для Prediction Analyzer."""
+    """Клиент API Gamma/Polymarket для Prediction Analyzer."""
 
     BASE = "https://gamma-api.polymarket.com"
 
@@ -20,18 +19,19 @@ class PolymarketClient:
         self.session = requests.Session()
 
     def _headers(self) -> Dict[str, str]:
+        """Возвращает заголовки для запросов."""
         return {
             "User-Agent": "PredictionAnalyzer/0.1",
             "Accept": "application/json"
         }
 
     def fetch_markets(self, limit: int = 50) -> List[Dict]:
-        logger.debug("Fetching markets (limit=%d) from %s", limit, self.BASE)
+        """Получает список рынков с ограничением на количество."""
+        logger.debug("Загружаем рынки (лимит=%d) с %s", limit, self.BASE)
         attempts = 3
         response = None
         for attempt in range(1, attempts + 1):
             try:
-                # Clamp limit to the range 1..500
                 limit = max(1, min(500, limit))
                 response = self.session.get(
                     f"{self.BASE}/markets",
@@ -42,22 +42,23 @@ class PolymarketClient:
                 response.raise_for_status()
                 data = response.json()
                 if not isinstance(data, list):
-                    logger.warning("Received non-list response from API")
+                    logger.warning("Получен некорректный список от API")
                     return []
                 return data
             except requests.RequestException as e:
                 if response is not None and getattr(response, 'status_code', None) in (429, 500, 502, 503, 504):
-                    logger.warning(f"HTTP error while fetching markets (attempt {attempt}): {e}")
+                    logger.warning(f"HTTP ошибка при загрузке рынков (попытка {attempt}): {e}")
                     time.sleep(0.5 * attempt)
                 else:
-                    logger.error(f"HTTP error while fetching markets: {e}")
+                    logger.error(f"HTTP ошибка при загрузке рынков: {e}")
                     return []
             except ValueError:
-                logger.warning("Received non-JSON response from API")
+                logger.warning("Получен некорректный JSON от API")
                 return []
 
     def fetch_market_details(self, market_id: str) -> Optional[Dict]:
-        logger.debug("Fetching market details for %s", market_id)
+        """Получает детали конкретного рынка."""
+        logger.debug("Загружаем детали рынка %s", market_id)
         attempts = 3
         response = None
         for attempt in range(1, attempts + 1):
@@ -70,22 +71,23 @@ class PolymarketClient:
                 response.raise_for_status()
                 data = response.json()
                 if not isinstance(data, dict):
-                    logger.warning("Received non-dict response from API")
+                    logger.warning("Получен некорректный словарь от API")
                     return None
                 return data
             except requests.RequestException as e:
                 if response is not None and getattr(response, 'status_code', None) in (429, 500, 502, 503, 504):
-                    logger.warning(f"HTTP error while fetching market details (attempt {attempt}): {e}")
+                    logger.warning(f"HTTP ошибка при загрузке деталей рынка (попытка {attempt}): {e}")
                     time.sleep(0.5 * attempt)
                 else:
-                    logger.error(f"HTTP error while fetching market details: {e}")
+                    logger.error(f"HTTP ошибка при загрузке деталей рынка: {e}")
                     return None
             except ValueError:
-                logger.warning("Received non-JSON response from API")
+                logger.warning("Получен некорректный JSON от API")
                 return None
 
     def fetch_prices(self) -> Dict[str, float]:
-        logger.debug("Fetching prices from %s", self.BASE)
+        """Получает текущие цены на рынках."""
+        logger.debug("Загружаем текущие цены с %s", self.BASE)
         attempts = 3
         response = None
         for attempt in range(1, attempts + 1):
@@ -98,22 +100,23 @@ class PolymarketClient:
                 response.raise_for_status()
                 data = response.json()
                 if not isinstance(data, dict):
-                    logger.warning("Received non-dict response from API")
+                    logger.warning("Получен некорректный словарь от API")
                     return {}
                 return data
             except requests.RequestException as e:
                 if response is not None and getattr(response, 'status_code', None) in (429, 500, 502, 503, 504):
-                    logger.warning(f"HTTP error while fetching prices (attempt {attempt}): {e}")
+                    logger.warning(f"HTTP ошибка при загрузке цен (попытка {attempt}): {e}")
                     time.sleep(0.5 * attempt)
                 else:
-                    logger.error(f"HTTP error while fetching prices: {e}")
+                    logger.error(f"HTTP ошибка при загрузке цен: {e}")
                     return {}
             except ValueError:
-                logger.warning("Received non-JSON response from API")
+                logger.warning("Получен некорректный JSON от API")
                 return {}
 
     def fetch_spreads(self) -> Dict[str, float]:
-        logger.debug("Fetching spreads from %s", self.BASE)
+        """Получает разбросы на рынках."""
+        logger.debug("Загружаем разбросы с %s", self.BASE)
         attempts = 3
         response = None
         for attempt in range(1, attempts + 1):
@@ -126,22 +129,23 @@ class PolymarketClient:
                 response.raise_for_status()
                 data = response.json()
                 if not isinstance(data, dict):
-                    logger.warning("Received non-dict response from API")
+                    logger.warning("Получен некорректный словарь от API")
                     return {}
                 return data
             except requests.RequestException as e:
                 if response is not None and getattr(response, 'status_code', None) in (429, 500, 502, 503, 504):
-                    logger.warning(f"HTTP error while fetching spreads (attempt {attempt}): {e}")
+                    logger.warning(f"HTTP ошибка при загрузке разбросов (попытка {attempt}): {e}")
                     time.sleep(0.5 * attempt)
                 else:
-                    logger.error(f"HTTP error while fetching spreads: {e}")
+                    logger.error(f"HTTP ошибка при загрузке разбросов: {e}")
                     return {}
             except ValueError:
-                logger.warning("Received non-JSON response from API")
+                logger.warning("Получен некорректный JSON от API")
                 return {}
 
     def fetch_volumes(self) -> Dict[str, float]:
-        logger.debug("Fetching volumes from %s", self.BASE)
+        """Получает объемы на рынках."""
+        logger.debug("Загружаем объемы с %s", self.BASE)
         attempts = 3
         response = None
         for attempt in range(1, attempts + 1):
@@ -154,21 +158,22 @@ class PolymarketClient:
                 response.raise_for_status()
                 data = response.json()
                 if not isinstance(data, dict):
-                    logger.warning("Received non-dict response from API")
+                    logger.warning("Получен некорректный словарь от API")
                     return {}
                 return data
             except requests.RequestException as e:
                 if response is not None and getattr(response, 'status_code', None) in (429, 500, 502, 503, 504):
-                    logger.warning(f"HTTP error while fetching volumes (attempt {attempt}): {e}")
+                    logger.warning(f"HTTP ошибка при загрузке объемов (попытка {attempt}): {e}")
                     time.sleep(0.5 * attempt)
                 else:
-                    logger.error(f"HTTP error while fetching volumes: {e}")
+                    logger.error(f"HTTP ошибка при загрузке объемов: {e}")
                     return {}
             except ValueError:
-                logger.warning("Received non-JSON response from API")
+                logger.warning("Получен некорректный JSON от API")
                 return {}
 
     def close(self):
+        """Закрывает сессию."""
         self.session.close()
 
 
@@ -176,44 +181,38 @@ class PolymarketAdapter:
     def __init__(self, client: PolymarketClient):
         self.client = client
 
-    def fetch_validated_markets(self, limit: int = 50) -> List[MarketSchema]:
+    def fetch_validated_markets(self, limit: int = 50) -> List[Dict]:
+        """Получает список валидированных рынков."""
         raw_markets = self.client.fetch_markets(limit)
-        validated: List[MarketSchema] = []
+        validated: List[Dict] = []
         for i, raw in enumerate(raw_markets):
             try:
                 schema = MarketSchema(**raw)
-                validated.append(schema)
+                validated.append(schema.dict())
             except ValidationError as e:
-                logger.warning("Skipping invalid market #%d from API: %s", i, e.errors()[0]["msg"])
+                logger.warning("Пропускаем невалидный рынок #%d от API: %s", i, e.errors()[0]["msg"])
         return validated
 
     def fetch_markets(self, limit: int = 50) -> List[Dict]:
+        """Получает список рынков."""
         return self.client.fetch_markets(limit)
 
     def fetch_market_details(self, market_id: str) -> Optional[Dict]:
+        """Получает детали конкретного рынка."""
         return self.client.fetch_market_details(market_id)
 
     def fetch_prices(self) -> Dict[str, float]:
+        """Получает текущие цены на рынках."""
         return self.client.fetch_prices()
 
     def fetch_spreads(self) -> Dict[str, float]:
+        """Получает разбросы на рынках."""
         return self.client.fetch_spreads()
 
     def fetch_volumes(self) -> Dict[str, float]:
+        """Получает объемы на рынках."""
         return self.client.fetch_volumes()
 
     def close(self):
+        """Закрывает сессию."""
         self.client.close()
-
-    def parse_market_record(self, raw: dict) -> dict | None:
-        if 'id' not in raw:
-            return None
-        liquidity = raw.get('liquidityNum') or raw.get('liquidity', 0.0)
-        volume_24h = raw.get('volume24hr') or raw.get('volume', 0.0)
-        return {
-            'id': raw['id'],
-            'question': raw.get('question', None),
-            'liquidity': liquidity,
-            'spread': raw.get('spread', None),
-            'volume_24h': volume_24h
-        }
