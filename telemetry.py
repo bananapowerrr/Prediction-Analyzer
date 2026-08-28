@@ -48,6 +48,7 @@ class Telemetry:
         self.log_dir = log_dir
         self._lock = threading.RLock()
         self._ensured = False
+        self._counters = {}
 
     # ------------------------------------------------------------------ #
     # Filesystem helpers
@@ -299,10 +300,22 @@ def setup(
         telemetry=telemetry, capture_threads=capture_threads
     )
 
+# ---------------------------------------------------------------------- #
+# In-memory counter
+# ---------------------------------------------------------------------- #
+    def inc(self, name: str) -> None:
+        """Increment the counter for the given name."""
+        with self._lock:
+            if name not in self._counters:
+                self._counters[name] = 0
+            self._counters[name] += 1
 
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
-    tel = setup(log_dir="telemetry_logs")
-    tel.dump_state(reason="self_test")
-    # Trigger an unhandled exception to demonstrate the hook.
-    1 / 0
+    def get(self, name: str) -> int:
+        """Get the current value of the counter for the given name."""
+        with self._lock:
+            return self._counters.get(name, 0)
+
+    def reset_all(self) -> None:
+        """Reset all counters."""
+        with self._lock:
+            self._counters.clear()
