@@ -76,7 +76,25 @@ def build_signals(scores: List[tuple[str, float]]) -> List[QuantitativeSignal]:
     :param scores: Список кортежей (идентификатор рынка, оценка)
     :return: Список сигналов
     """
+    if not scores:
+        return []
+    
     signals = []
     for market_id, score in scores:
         signals.append(build_signal(market_id, score))
+    return signals
+
+def compute_signals(markets: List[Dict[str, Any]]) -> List[QuantitativeSignal]:
+    """
+    Вычисляет сигналы для списка рынков.
+    
+    :param markets: Список словарей с данными рынка
+    :return: Список сигналов
+    """
+    if not markets:
+        return []
+    
+    signals = []
+    for market in markets:
+        signals.extend(generate_quantitative_signals(market))
     return signals
