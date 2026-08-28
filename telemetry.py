@@ -6,21 +6,15 @@ import json
 import logging
 import os
 import platform
+import psutil
 import sys
 import threading
-import traceback
 from types import TracebackType
 from typing import Any, Callable, Dict, Optional, Tuple, Type
 
-try:  # optional, richer metrics
-    import psutil  # type: ignore
-    _HAS_PSUTIL = True
-except Exception:  # pragma: no cover - optional dependency
-    psutil = None  # type: ignore
-    _HAS_PSUTIL = False
-
-
 logger = logging.getLogger("telemetry")
+
+_HAS_PSUTIL = hasattr(psutil, "disk_usage")
 
 
 class TelemetryError(Exception):
@@ -96,24 +90,6 @@ class Telemetry:
         working = self._disk_usage(os.getcwd())
         if working is not None:
             state["working_dir_disk"] = working
-
-        if _HAS_PSUTIL:
-            try:
-                state["system_metrics"] = {
-                    "cpu_count": psutil.cpu_count(),
-                    "cpu_percent": psutil.cpu_percent(interval=None),
-                    "memory": _as_dict(psutil.virtual_memory()),
-                    "swap": _as_dict(psutil.swap_memory()),
-                    "disk": _as_dict(psutil.disk_usage("/")),
-                    "boot_time": _dt.datetime.fromtimestamp(psutil.boot_time()).isoformat(),
-                }
-                state["process_metrics"] = {
-                    "cpu_percent": psutil.Process().cpu_percent(interval=None),
-                    "memory_info": _as_dict(psutil.Process().memory_info()),
-                    "num_threads": psutil.Process().num_threads(),
-                }
-            except Exception as exc:  # pragma: no cover - защита
-                state["system_metrics_error"] = repr(exc)
 
         return state
 
@@ -248,9 +224,10 @@ def _json_default(obj: Any) -> Any:
     def record_scan(self, total: int, passed: int) -> None:
         """Записывает результаты сканирования."""
         with self._lock:
-            if name not in self._counters:
-                self._counters[name] = 0
-            self._counters[name] += 1
+            self._scan_stats = {
+                "total": total,
+                "passed": passed,
+            }
 
     def dump_counters(self) -> Dict[str, int]:
         """Возвращает копию всех счётчиков."""
