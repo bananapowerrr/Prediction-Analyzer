@@ -22,3 +22,16 @@ def format_explanation(market_question: str, action: str, confidence: float) -> 
     :return: Строка-пояснение
     """
     return f"Для вопроса рынка '{market_question}' рекомендуется {action} с уверенностью {confidence:.2f}%."
+
+def format_explanations(items: list[tuple]) -> list[str]:
+    """
+    Форматирует список объяснений для арбитража на русском языке.
+
+    :param items: Список кортежей (вопрос рынка, действие, уверенность)
+    :return: Список строк-пояснений
+    """
+    explanations = []
+    for market_question, action, confidence in items:
+        explanation = format_explanation(market_question, action, confidence)
+        explanations.append(explanation)
+    return explanations

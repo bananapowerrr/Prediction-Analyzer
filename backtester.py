@@ -108,11 +108,48 @@ class Backtester:
             'winrate': winrate
         }
 
+    async def run_backtest(self, signals: List[Dict]) -> Dict:
+        """
+        Выполняет оффлайн-оценку стратегий на основе сигналов.
+
+        :param signals: Список словарей с сигналами для оценки.
+        :return: Сводка по результатам оценки стратегий.
+        """
+        results = []
+        for signal in signals:
+            market = Market(id=signal['market_id'])
+            outcome_probabilities = signal['outcome_probabilities']
+            result = await self.simulate_arbitrage(market, outcome_probabilities)
+            results.append({
+                'market_id': market.id,
+                'expected_value': result[0],
+                'fractional_kelly': result[1],
+                'position_size': result[2]
+            })
+
+        return self.summarize_trades(results)
+
 async def main():
     client = PolymarketClient()
     backtester = Backtester(client, min_liquidity=100000, max_spread=0.01, min_volume=100000)
-    results = await backtester.backtest_strategies()
-    print(results)
+    signals = [
+        {
+            'market_id': 'market1',
+            'outcome_probabilities': {
+                'outcome1': 0.6,
+                'outcome2': 0.4
+            }
+        },
+        {
+            'market_id': 'market2',
+            'outcome_probabilities': {
+                'outcome1': 0.7,
+                'outcome2': 0.3
+            }
+        }
+    ]
+    summary = await backtester.run_backtest(signals)
+    print(summary)
 
 if __name__ == '__main__':
     asyncio.run(main())
