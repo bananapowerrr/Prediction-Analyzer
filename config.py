@@ -152,3 +152,4 @@ LOCAL_TIMEOUT = settings.local.timeout
 LOCAL_TEMPERATURE = settings.local.temperature
 
 DISPATCHER_TEST_MARKER = "v6.1"
+DISPATCHER_TEST_MARKER_V62 = "v6.2"
