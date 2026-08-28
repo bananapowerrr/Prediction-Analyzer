@@ -7,6 +7,7 @@ from config import MIN_LIQUIDITY_USD, MAX_SPREAD_PCT, SCAN_LIMIT, MIN_VOLUME_24H
 from pathlib import Path
 from persistence import save_markets_json
 import sys
+from typing import Optional, List, Dict, Any
 
 def main() -> None:
     if not logging.getLogger().hasHandlers():
@@ -67,9 +68,9 @@ def main() -> None:
             sys.exit(1)
 
     if args.json:
-        json_output = []
+        json_output: List[Dict[str, Any]] = []
         for m in markets:
-            entry = {
+            entry: Dict[str, Any] = {
                 "id": m.id,
                 "question": m.question,
                 "liquidity": m.liquidity,
