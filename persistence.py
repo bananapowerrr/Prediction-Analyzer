@@ -27,6 +27,8 @@ class PersistenceManager:
         self.conn.commit()
 
     def save_event(self, event_type: str, data: Dict):
+        if not event_type or not data:
+            raise ValueError("event_type and data must be provided")
         self.cursor.execute('INSERT INTO reports (report_type, data) VALUES (?, ?)', (event_type, json.dumps(data)))
         self.conn.commit()
 
@@ -41,6 +43,8 @@ class PersistenceManager:
         return [json.loads(dict(row)['data']) for row in results]
 
     def save_report(self, report_type: str, data: Dict):
+        if not report_type or not data:
+            raise ValueError("report_type and data must be provided")
         self.cursor.execute('INSERT INTO reports (report_type, data) VALUES (?, ?)', (report_type, json.dumps(data)))
         self.conn.commit()
 
@@ -57,6 +61,8 @@ class PersistenceManager:
         return [json.loads(dict(row)['data']) for row in results]
 
     def save_markets_json(self, markets: List[Dict], path: str):
+        if not markets or not path:
+            raise ValueError("markets and path must be provided")
         os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
         data = [_to_dict(m) for m in markets]
         with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as tmp:
@@ -64,6 +70,8 @@ class PersistenceManager:
         os.replace(tmp.name, path)
 
     def load_markets_json(self, path: str) -> List[Dict]:
+        if not path:
+            raise ValueError("path must be provided")
         try:
             with open(path, 'r', encoding='utf-8') as f:
                 return json.load(f)
@@ -72,6 +80,8 @@ class PersistenceManager:
 
     def save_markets_csv(self, path: str, markets: List[Dict]):
         """Сохранить список dict (id, question, liquidity, spread, volume_24h) в CSV UTF-8 с заголовком id,question,liquidity,spread,volume_24h."""
+        if not markets or not path:
+            raise ValueError("markets and path must be provided")
         if not markets:
             return
         try:
@@ -93,6 +103,8 @@ def _to_dict(obj):
     return getattr(obj, '__dict__', obj)
 
 def save_markets_json(markets: List[Dict], path: str):
+    if not markets or not path:
+        raise ValueError("markets and path must be provided")
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     data = [_to_dict(m) for m in markets]
     with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as tmp:
@@ -100,6 +112,8 @@ def save_markets_json(markets: List[Dict], path: str):
     os.replace(tmp.name, path)
 
 def load_markets_json(path: str) -> List[Dict]:
+    if not path:
+        raise ValueError("path must be provided")
     try:
         with open(path, 'r', encoding='utf-8') as f:
             return json.load(f)
