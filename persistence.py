@@ -5,6 +5,7 @@ import json
 import logging
 import tempfile
 import csv
+from dataclasses import asdict, is_dataclass
 
 logger = logging.getLogger(__name__)
 
@@ -55,27 +56,11 @@ class PersistenceManager:
         results = self.cursor.fetchall()
         return [dict(row) for row in results]
 
-    def save_markets_json(self, path: str, markets: List[Dict]):
-        """Сохранить список dict (id, question, liquidity, spread, volume_24h) в JSON UTF-8."""
-        try:
-            normalized_markets = [{k: v for k, v in market.items() if k in ['id', 'question', 'liquidity', 'spread', 'volume_24h']} for market in markets]
-            with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as temp_file:
-                json.dump(normalized_markets, temp_file, ensure_ascii=False, indent=4)
-                temp_path = temp_file.name
-            os.replace(temp_path, path)
-        except IOError as e:
-            logger.error(f"Ошибка при сохранении файла {path}: {e}")
+    def save_markets_json(self, markets: list, path: str):
+        save_markets_json(markets, path)
 
-    def load_markets_json(self, path: str) -> List[Dict]:
-        """Загрузить список dict (id, question, liquidity, spread, volume_24h) из JSON UTF-8. Если файла нет — []."""
-        try:
-            with open(path, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except FileNotFoundError:
-            return []
-        except json.JSONDecodeError as e:
-            logger.error(f"Ошибка при загрузке файла {path}: {e}")
-            return []
+    def load_markets_json(self, path: str) -> list:
+        return load_markets_json(path)
 
     def save_markets_csv(self, path: str, markets: List[Dict]):
         """Сохранить список dict (id, question, liquidity, spread, volume_24h) в CSV UTF-8 с заголовком."""
@@ -90,16 +75,27 @@ class PersistenceManager:
         except IOError as e:
             logger.error(f"Ошибка при сохранении файла {path}: {e}")
 
-def save_markets_json(path: str, markets: List[Dict]):
-    """Сохранить список dict (id, question, liquidity, spread, volume_24h) в JSON UTF-8."""
+def _to_dict(obj):
+    if is_dataclass(obj) and not isinstance(obj, type):
+        return asdict(obj)
+    if isinstance(obj, dict):
+        return obj
+    return getattr(obj, '__dict__', obj)
+
+def save_markets_json(markets: list, path: str):
+    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+    data = [_to_dict(m) for m in markets]
+    with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as tmp:
+        json.dump(data, tmp, ensure_ascii=False, indent=4)
+        tmp_path = tmp.name
+    os.replace(tmp_path, path)
+
+def load_markets_json(path: str) -> list:
     try:
-        normalized_markets = [{k: v for k, v in market.items() if k in ['id', 'question', 'liquidity', 'spread', 'volume_24h']} for market in markets]
-        with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as temp_file:
-            json.dump(normalized_markets, temp_file, ensure_ascii=False, indent=4)
-            temp_path = temp_file.name
-        os.replace(temp_path, path)
-    except IOError as e:
-        logger.error(f"Ошибка при сохранении файла {path}: {e}")
+        with open(path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
 
 def save_markets_csv(path: str, markets: List[Dict]):
     """Сохранить список dict (id, question, liquidity, spread, volume_24h) в CSV UTF-8 с заголовком id,question,liquidity,spread,volume_24h."""

@@ -51,9 +51,9 @@ class Order:
 class Market:
     id: str
     question: str
-    liquidity: float
-    spread: float
-    volume_24h: float = Field(default=0.0, ge=0)  # Добавлен docstring и default значение
+    liquidity: float = 0.0
+    spread: float = 0.0
+    volume_24h: float = 0.0
 
     def __repr__(self) -> str:
         return (
