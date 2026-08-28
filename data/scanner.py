@@ -2,9 +2,11 @@
 Сканер получает рынки через клиент Polymarket и отфильтровывает их гейтами Prediction Analyzer.
 """
 
+import asyncio
+import inspect
 import logging
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from pydantic import ValidationError
 
@@ -13,11 +15,10 @@ from config import MAX_SPREAD_PCT, MIN_LIQUIDITY_USD, MIN_VOLUME_24H, SCAN_LIMIT
 from core.models import Market, MarketSchema
 from data.filters import passes_all_gates
 from data.polymarket_client import PolymarketClient
-import inspect  # Добавлен импорт модуля inspect
 
 logger = logging.getLogger(__name__)
 
-def _to_float(value, default: float = 0.0) -> float:
+def _to_float(value: object, default: float = 0.0) -> float:
     """Безопасно приводит значение к float, при ошибке возвращает default."""
     if value is None:
         return default
@@ -41,22 +42,28 @@ class MarketScanner:
     Метод :meth:`scan` выполняет получение, парсинг и применение гейтов ликвидности/разброса/объема, определенных в ``data.filters``.
     """
 
-    def __init__(self, scan_config: Optional[ScanConfig] = None):
+    def __init__(self, scan_config: Optional[ScanConfig] = None) -> None:
         self.scan_config = scan_config or ScanConfig()
 
-    def fetch_raw(self) -> list:
+    def fetch_raw(self) -> List[Dict[str, object]]:
         raise NotImplementedError("Subclasses must implement this method")
 
-    def parse(self, raw: list) -> List[Market]:
+    def _parse_record(self, index: int, record: Dict[str, object]) -> Optional[Market]:
+        """Парсит одну запись в Market, при ошибке логирует и возвращает None."""
+        try:
+            return MarketSchema(**record).to_market()
+        except ValidationError as e:
+            logger.warning(f"Пропускаю некорректную запись рынка #{index}: {e.errors()[0]['msg']}")
+        except Exception as e:
+            logger.warning(f"Пропускаю некорректную запись рынка #{index}: {e}")
+        return None
+
+    def parse(self, raw: List[Dict[str, object]]) -> List[Market]:
         markets: List[Market] = []
         for i, record in enumerate(raw):
-            try:
-                schema = MarketSchema(**record)
-                markets.append(schema.to_market())
-            except ValidationError as e:
-                logger.warning(f"Пропускаю некорректную запись рынка #{i}: {e.errors()[0]['msg']}")
-            except Exception as e:
-                logger.warning(f"Пропускаю некорректную запись рынка #{i}: {e}")
+            market = self._parse_record(i, record)
+            if market is not None:
+                markets.append(market)
         return markets
 
     def filter_markets(self, markets: List[Market]) -> List[Market]:
@@ -81,7 +88,7 @@ class MarketScanner:
 class PolymarketScanner(MarketScanner):
     """Рабочий сканер Polymarket: получает сырые рынки через PolymarketClient, парсит их в ``Market``."""
 
-    def __init__(self, client: Optional[PolymarketClient] = None, scan_config: Optional[ScanConfig] = None):
+    def __init__(self, client: Optional["PolymarketClient"] = None, scan_config: Optional[ScanConfig] = None) -> None:
         super().__init__(scan_config)
         self.client = client or PolymarketClient()
 
@@ -96,14 +103,14 @@ class PolymarketScanner(MarketScanner):
             return 0.0
         return round(ask - bid, 4)
 
-    def fetch_raw(self, limit: Optional[int] = None) -> list:
+    def fetch_raw(self, limit: Optional[int] = None) -> List[Dict[str, object]]:
         limit = limit if limit is not None else self.scan_config.limit
         limit = max(1, min(200, limit))  # Clamp limit to [1, 200]
         try:
             result = self.client.fetch_markets(limit=limit)
             if inspect.isawaitable(result):
-                import asyncio
-                result = asyncio.run(result)
+                if inspect.iscoroutine(result):
+                    result = asyncio.run(result)
         except Exception as e:
             logger.warning(f"Не удалось получить рынки с Polymarket API (limit={limit}): {e}")
             return []
@@ -113,7 +120,7 @@ class PolymarketScanner(MarketScanner):
         logger.info(f"Получено {len(result)} сырых рынков с Polymarket API (limit={limit})")
         return result
 
-    def parse(self, raw: list) -> List[Market]:
+    def parse(self, raw: List[Dict[str, object]]) -> List[Market]:
         markets: List[Market] = []
         for i, record in enumerate(raw):
             if not isinstance(record, dict):
@@ -133,13 +140,9 @@ class PolymarketScanner(MarketScanner):
                 "spread": self._extract_spread(record),
                 "volume_24h": _to_float(volume_24h, default=0.0),
             }
-            try:
-                market = MarketSchema(**normalized).to_market()
+            market = self._parse_record(i, normalized)
+            if market is not None:
                 markets.append(market)
-            except ValidationError as e:
-                logger.warning(f"Пропускаю некорректную запись рынка #{i}: {e.errors()[0]['msg']}")
-            except Exception as e:
-                logger.warning(f"Пропускаю некорректную запись рынка #{i}: {e}")
         return markets
 
 
@@ -171,15 +174,8 @@ def run_scan(min_liquidity: Optional[float] = None, max_spread: Optional[float] 
     :param sort_by_liquidity: Сортировать по ликвидности
     :return: Список отфильтрованных и отсортированных рынков
     """
-    scan_config = ScanConfig(
-        min_liquidity=min_liquidity,
-        max_spread=max_spread,
-        min_volume=min_volume,
-        limit=limit if limit is not None else SCAN_LIMIT,
-    )
-    logger.info(f"Запуск скана: минимальная ликвидность={min_liquidity}, максимальный разброс={max_spread}, минимальный объем={min_volume}, ограничение={scan_config.limit}")
-    scanner = PolymarketScanner(scan_config=scan_config)
-    markets = scanner.scan()
+    logger.info(f"Запуск скана: минимальная ликвидность={min_liquidity}, максимальный разброс={max_spread}, минимальный объем={min_volume}, ограничение={limit if limit is not None else SCAN_LIMIT}")
+    markets = scan_markets(min_liquidity, max_spread, min_volume, limit)
     if not markets:
         logger.warning("Нет рынков после фильтрации.")
     if sort_by_liquidity:
@@ -197,3 +193,12 @@ def run_scan(min_liquidity: Optional[float] = None, max_spread: Optional[float] 
         logger.debug("Не удалось записать метрики скана в telemetry", exc_info=True)
 
     return markets
+
+
+__all__ = [
+    "MarketScanner",
+    "PolymarketScanner",
+    "ScanConfig",
+    "scan_markets",
+    "run_scan",
+]
