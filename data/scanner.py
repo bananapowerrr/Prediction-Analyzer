@@ -8,6 +8,7 @@ from core.models import Market, MarketSchema
 from data.filters import passes_all_gates
 import logging
 from pydantic import ValidationError
+import telemetry
 
 logger = logging.getLogger(__name__)
 
@@ -70,4 +71,12 @@ def run_scan(min_liquidity: Optional[float] = None, max_spread: Optional[float] 
         markets = sorted(markets, key=lambda m: m.liquidity, reverse=True)
     if limit is not None:
         markets = markets[:limit]
+    
+    try:
+        total = len(markets)
+        passed = len([m for m in markets if passes_all_gates(m, min_liquidity, max_spread, min_volume)])
+        telemetry.record_scan(total, passed)
+    except ImportError:
+        logger.debug("telemetry module not available, skipping record_scan")
+    
     return markets
