@@ -8,7 +8,7 @@ from risk_engine import calculate_expected_value, calculate_fractional_kelly, de
 
 class Backtester:
     """
-    Офлайн-оценка стратегий на истории.
+    Оффлайн-оценка стратегий на истории.
 
     Этот класс выполняет оффлайн-оценку стратегий на основе исторических данных.
     Он использует данные с Polymarket, фильтрует рынки по заданным критериям и
@@ -128,6 +128,8 @@ class Backtester:
             })
 
         return self.summarize_trades(results)
+
+__all__ = ['Backtester']
 
 async def main():
     client = PolymarketClient()
