@@ -1,4 +1,4 @@
-"""Deep diagnostic telemetry module.
+"""Метрики и логирование сканера.
 
 Provides:
   * ``Telemetry`` class that captures unhandled exceptions and system state
