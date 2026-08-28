@@ -3,7 +3,7 @@ from risk_engine import calculate_fractional_kelly, determine_position_size, ass
 from core.models import Market
 
 class TestRiskKelly(unittest.TestCase):
-    """Тесты для функций риска иKelly."""
+    """Тесты для функций риска и Kelly."""
 
     def test_fractional_kelly_with_zero_spread(self):
         """Проверка расчета фракционного Kelly с нулевым разбросом."""
