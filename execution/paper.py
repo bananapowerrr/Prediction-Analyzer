@@ -61,7 +61,7 @@ class PaperBroker:
         self._update_position(market_id, side, size, price)
         return {'id': order_id, 'status': 'filled', 'pnl': 0}
 
-    def _update_position(self, market_id: str, side: str, size: float, price: float):
+    def _update_position(self, market_id: str, side: str, size: float, price: float) -> None:
         """
         Обновляет позиции после выполнения сделки.
 
@@ -92,7 +92,7 @@ class PaperBroker:
         """
         return [{'market_id': m, **p} for m, p in self.positions.items() if p['size'] != 0]
 
-    def reset(self, balance: float = BALANCE_DEFAULT):
+    def reset(self, balance: float = BALANCE_DEFAULT) -> None:
         """
         Сбрасывает состояние брокера.
 
