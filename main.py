@@ -9,7 +9,7 @@ def main() -> None:
     if not logging.getLogger().hasHandlers():
         logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 
-    parser = argparse.ArgumentParser(description="Desktop Tutorial Scanner")
+    parser = argparse.ArgumentParser(description="Prediction Analyzer — сканер рынков Polymarket")
     parser.add_argument("command", nargs="?", default="scan", choices=["scan", "status"], help="Command to execute")
     parser.add_argument("--min-liquidity", type=float, default=MIN_LIQUIDITY_USD, help="Minimum liquidity in USD")
     parser.add_argument("--max-spread", type=float, default=MAX_SPREAD_PCT, help="Maximum spread in percentage")
