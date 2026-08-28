@@ -21,3 +21,7 @@ class PaperBroker:
 
     def get_balance(self):
         return self.balance
+
+    def reset(self):
+        self.orders = {}
+        self.balance = 10000.0
