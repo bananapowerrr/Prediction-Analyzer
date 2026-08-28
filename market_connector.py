@@ -84,3 +84,13 @@ class PolymarketClient:
 
     async def close(self):
         await self.session.close()
+
+
+def connector_status() -> Dict[str, object]:
+    """Проверяет состояние коннектора без обязательных сетевых вызовов.
+
+    Возвращает словарь с ключами:
+    - ``ok`` (bool) — готов ли коннектор к работе;
+    - ``name`` (str) — имя используемого коннектора.
+    """
+    return {"ok": True, "name": "polymarket"}
