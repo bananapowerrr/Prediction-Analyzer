@@ -58,22 +58,22 @@ class BaseRpcSettings(BaseSettings):
 class LiquidityGateSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="LIQUIDITY_")
 
-    min_liquidity_usd: float = 1000.0
-    min_volume_24h: float = 0.0
+    min_liquidity_usd: float = 1000.0  # Минимальная ликвидность в USD для рынка
+    min_volume_24h: float = 0.0  # Минимальный объем за 24 часа для рынка
 
 
 class SpreadSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="SPREAD_")
 
-    max_spread_pct: float = 0.1
+    max_spread_pct: float = 0.1  # Максимальный разброс в процентах для рынка
 
 
 class ConnectionSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="CONN_")
 
     gamma_api_base: str = "https://gamma-api.polymarket.com"
-    http_timeout: float = 30.0
-    scan_limit: int = 50
+    http_timeout: float = 30.0  # Время ожидания HTTP-запроса
+    scan_limit: int = 50  # Ограничение на количество рынков для сканирования
 
 
 class CloudTierSettings(BaseSettings):
