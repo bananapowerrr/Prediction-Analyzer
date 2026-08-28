@@ -1,3 +1,7 @@
 requests
 pydantic
 pydantic-settings
+aiohttp
+feedparser
+web3
+pytest
