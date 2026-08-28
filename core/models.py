@@ -11,6 +11,9 @@ from pydantic import BaseModel, Field, field_validator
 
 @dataclass
 class Order:
+    """
+    Модель заказа.
+    """
     order_id: str
     market_id: str
     side: str
@@ -34,6 +37,9 @@ class Order:
 
 @dataclass
 class Market:
+    """
+    Модель рынка.
+    """
     id: str
     question: str
     liquidity: float = 0.0
@@ -53,6 +59,9 @@ class Market:
 
 @dataclass
 class QuantitativeSignal:
+    """
+    Модель количественного сигнала.
+    """
     action: str
     confidence: float
     indicators: Dict[str, float] = field(default_factory=dict)
@@ -62,6 +71,9 @@ class QuantitativeSignal:
 
 
 class RawMarketData(BaseModel):
+    """
+    Схема для сырых данных рынка.
+    """
     id: str
     question: str
     liquidity: float = Field(ge=0)
@@ -84,6 +96,9 @@ class RawMarketData(BaseModel):
 
 
 class MarketSchema(BaseModel):
+    """
+    Схема для данных рынка.
+    """
     id: str
     question: str
     liquidity: float = Field(ge=0)
@@ -104,6 +119,9 @@ class MarketSchema(BaseModel):
 
 
 class OrderSchema(BaseModel):
+    """
+    Схема для данных заказа.
+    """
     order_id: str
     market_id: str
     side: str
@@ -130,6 +148,9 @@ class OrderSchema(BaseModel):
 
 
 class QuantitativeSignalSchema(BaseModel):
+    """
+    Схема для количественного сигнала.
+    """
     action: str
     confidence: float = Field(ge=0, le=1)
     indicators: Dict[str, float] = Field(default_factory=dict)
@@ -150,15 +171,24 @@ class QuantitativeSignalSchema(BaseModel):
 
 
 def validate_market_data(data: Dict) -> Market:
+    """
+    Валидация данных рынка.
+    """
     schema = MarketSchema(**data)
     return schema.to_market()
 
 
 def validate_order_data(data: Dict) -> Order:
+    """
+    Валидация данных заказа.
+    """
     schema = OrderSchema(**data)
     return schema.to_order()
 
 
 def validate_signal_data(data: Dict) -> QuantitativeSignal:
+    """
+    Валидация количественного сигнала.
+    """
     schema = QuantitativeSignalSchema(**data)
     return schema.to_signal()
