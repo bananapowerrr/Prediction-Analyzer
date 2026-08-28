@@ -100,7 +100,7 @@ class Backtester:
             elif 'pnl' in trade and trade['pnl'] < 0:
                 losses += 1
 
-        winrate = wins / count if count > 0 else 0
+        winrate = wins / count if count > 0 else 0.0
         return {
             'count': count,
             'wins': wins,
