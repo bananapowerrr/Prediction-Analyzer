@@ -82,8 +82,7 @@ def main() -> None:
         print(json.dumps(json_output, indent=4))
         if args.out:
             args.out.parent.mkdir(parents=True, exist_ok=True)
-            with open(args.out, "w", encoding="utf-8") as f:
-                json.dump(json_output, f, indent=4)
+            save_markets_json(json_output, args.out)
     else:
         print(f"Найдено {len(markets)} рынков")
         print(f"{'ID':<10}{'Question':<60}{'Liquidity':<15}{'Spread':<10}{'Volume 24h':<15}")
