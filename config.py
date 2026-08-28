@@ -151,3 +151,5 @@ LOCAL_JUDGE_MODEL = settings.local.judge_model
 LOCAL_TIMEOUT = settings.local.timeout
 LOCAL_TEMPERATURE = settings.local.temperature
 
+APP_NAME = 'prediction-analyzer'
+APP_TITLE = 'Prediction Analyzer'
