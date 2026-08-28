@@ -82,6 +82,32 @@ class Backtester:
             })
         return results
 
+    @staticmethod
+    def summarize_trades(trades: List[Dict]) -> Dict:
+        """
+        Сводит данные о сделках к общему виду.
+
+        :param trades: Список словарей с данными о сделках.
+        :return: Словарь с ключами count, wins, losses, winrate (0..1).
+        """
+        count = len(trades)
+        wins = 0
+        losses = 0
+
+        for trade in trades:
+            if 'pnl' in trade and trade['pnl'] > 0:
+                wins += 1
+            elif 'pnl' in trade and trade['pnl'] < 0:
+                losses += 1
+
+        winrate = wins / count if count > 0 else 0
+        return {
+            'count': count,
+            'wins': wins,
+            'losses': losses,
+            'winrate': winrate
+        }
+
 async def main():
     client = PolymarketClient()
     backtester = Backtester(client, min_liquidity=100000, max_spread=0.01, min_volume=100000)
