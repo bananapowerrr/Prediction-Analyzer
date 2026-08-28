@@ -2,6 +2,7 @@ import argparse
 import json
 import logging
 from data.scanner import run_scan
+from data.ranking import rank_markets
 from config import MIN_LIQUIDITY_USD, MAX_SPREAD_PCT, SCAN_LIMIT, MIN_VOLUME_24H
 from pathlib import Path
 from persistence import save_markets_json
@@ -11,7 +12,7 @@ def main() -> None:
         logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 
     parser = argparse.ArgumentParser(description="Prediction Analyzer — сканер рынков Polymarket")
-    parser.add_argument("command", nargs="?", default="scan", choices=["scan", "status", "version"], help="Команда для выполнения")
+    parser.add_argument("command", nargs="?", default="scan", choices=["scan", "rank", "status", "version"], help="Команда для выполнения")
     parser.add_argument("--min-liquidity", type=float, default=MIN_LIQUIDITY_USD, help="Минимальная ликвидность в USD")
     parser.add_argument("--max-spread", type=float, default=MAX_SPREAD_PCT, help="Максимальный спред в процентах")
     parser.add_argument("--min-volume", type=float, default=MIN_VOLUME_24H, help="Минимальный объем за 24 часа")
@@ -49,6 +50,16 @@ def main() -> None:
         with open("errors/scan_error.log", "w", encoding="utf-8") as f:
             f.write(f"Ошибка сканирования: {e}")
         return
+
+    if args.command == "rank":
+        try:
+            markets = rank_markets(markets)
+        except Exception as e:
+            logging.error(f"Ошибка сортировки: {e}")
+            Path("errors").mkdir(parents=True, exist_ok=True)
+            with open("errors/rank_error.log", "w", encoding="utf-8") as f:
+                f.write(f"Ошибка сортировки: {e}")
+            return
 
     if args.json:
         json_output = []
