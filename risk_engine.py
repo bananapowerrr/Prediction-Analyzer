@@ -58,9 +58,18 @@ def calculate_fractional_kelly(market: Market, outcome_probabilities: Dict[str, 
     kelly_fraction = (ev - risk_free_rate * market.liquidity) / denominator
     return max(0, min(1, kelly_fraction))
 
-def determine_position_size(market: Market, outcome_probabilities: Dict[str, float], initial_capital: float) -> float:
+def determine_position_size(market: Market, outcome_probabilities: Dict[str, float], initial_capital: float, max_fraction: float = 0.25) -> float:
+    """
+    Определяет размер позиции для заданного рынка и вероятностей исходов.
+
+    :param market: Маркет для расчета.
+    :param outcome_probabilities: Словарь с вероятностями исходов.
+    :param initial_capital: Начальный капитал.
+    :param max_fraction: Максимальная доля капитала, которую можно использовать для позиции (по умолчанию 0.25).
+    :return: Размер позиции.
+    """
     kelly_fraction = calculate_fractional_kelly(market, outcome_probabilities)
-    position_size = initial_capital * kelly_fraction
+    position_size = min(initial_capital * kelly_fraction, initial_capital * max_fraction)
     return position_size
 
 def _z_score(confidence_level: float) -> float:
