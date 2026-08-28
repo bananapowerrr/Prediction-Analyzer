@@ -1,13 +1,12 @@
 """
-Файл фильтрует рынки Polymarket по ликвидности, спреду и объёму.
-passes_all_gates объединяет три гейта.
-filter_markets фильтрует рынки, проходящие все три гейта.
+Фильтрует рынки Polymarket по ликвидности, спреду и объему.
 """
 
 from __future__ import annotations
+from typing import List, Optional
 from core.models import Market
 
-def passes_liquidity_gate(market: Market, min_liquidity: float | None) -> bool:
+def passes_liquidity_gate(market: Market, min_liquidity: Optional[float]) -> bool:
     """
     Проверяет, проходит ли рынок гейт ликвидности.
 
@@ -19,7 +18,7 @@ def passes_liquidity_gate(market: Market, min_liquidity: float | None) -> bool:
         return True
     return market.liquidity >= min_liquidity
 
-def passes_spread_gate(market: Market, max_spread: float | None) -> bool:
+def passes_spread_gate(market: Market, max_spread: Optional[float]) -> bool:
     """
     Проверяет, проходит ли рынок гейт спреда.
 
@@ -31,7 +30,7 @@ def passes_spread_gate(market: Market, max_spread: float | None) -> bool:
         return True
     return market.spread <= max_spread
 
-def passes_volume_gate(market: Market, min_volume: float | None) -> bool:
+def passes_volume_gate(market: Market, min_volume: Optional[float]) -> bool:
     """
     Проверяет, проходит ли рынок гейт объема.
 
@@ -43,7 +42,7 @@ def passes_volume_gate(market: Market, min_volume: float | None) -> bool:
         return True
     return market.volume_24h >= min_volume
 
-def passes_all_gates(market: Market, min_liquidity: float | None, max_spread: float | None, min_volume: float | None) -> bool:
+def passes_all_gates(market: Market, min_liquidity: Optional[float], max_spread: Optional[float], min_volume: Optional[float]) -> bool:
     """
     Проверяет, проходит ли рынок все три гейта (ликвидность, спред и объем).
 
@@ -59,7 +58,7 @@ def passes_all_gates(market: Market, min_liquidity: float | None, max_spread: fl
             passes_spread_gate(market, max_spread) and
             passes_volume_gate(market, min_volume))
 
-def gate_reject_reasons(market: Market, min_liquidity: float | None, max_spread: float | None, min_volume: float | None) -> list[str]:
+def gate_reject_reasons(market: Market, min_liquidity: Optional[float], max_spread: Optional[float], min_volume: Optional[float]) -> List[str]:
     reasons = []
     if not passes_liquidity_gate(market, min_liquidity):
         reasons.append('low_liquidity')
@@ -69,7 +68,7 @@ def gate_reject_reasons(market: Market, min_liquidity: float | None, max_spread:
         reasons.append('low_volume')
     return reasons
 
-def filter_markets(markets: list[Market], min_liquidity: float | None, max_spread: float | None, min_volume: float | None) -> list[Market]:
+def filter_markets(markets: List[Market], min_liquidity: Optional[float], max_spread: Optional[float], min_volume: Optional[float]) -> List[Market]:
     """
     Фильтрует рынки, проходящие все три гейта.
 
