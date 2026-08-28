@@ -1,6 +1,9 @@
 from dataclasses import dataclass, field
 from typing import List, Dict, Any
 from core.models import QuantitativeSignal
+import logging
+
+logger = logging.getLogger(__name__)
 
 @dataclass
 class QuantitativeSignal:
@@ -17,7 +20,7 @@ class QuantitativeSignal:
 
 def generate_quantitative_signals(market_data: Dict[str, Any]) -> List[QuantitativeSignal]:
     """
-    Пример логики для генерации сигналов на основе данных рынка.
+    Генерирует сигналы на основе данных рынка.
     """
     signals = []
     price = market_data.get("price", None)
@@ -96,5 +99,8 @@ def compute_signals(markets: List[Dict[str, Any]]) -> List[QuantitativeSignal]:
     
     signals = []
     for market in markets:
-        signals.extend(generate_quantitative_signals(market))
+        try:
+            signals.extend(generate_quantitative_signals(market))
+        except Exception as e:
+            logger.error(f"Error generating signals for market {market}: {e}")
     return signals
