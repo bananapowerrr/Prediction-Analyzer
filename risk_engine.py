@@ -66,7 +66,11 @@ def calculate_fractional_kelly(market: Market, outcome_probabilities: Dict[str, 
     if denominator == 0 or ev <= 0:
         return 0.0
     kelly_fraction = (ev - risk_free_rate * market.liquidity) / denominator
-    return max(0, min(0.25, kelly_fraction))
+    if kelly_fraction < 0:
+        return 0.0
+    elif kelly_fraction > 0.25:
+        return 0.25
+    return kelly_fraction
 
 def determine_position_size(market: Market, outcome_probabilities: Dict[str, float], initial_capital: float, max_fraction: float = 0.25) -> float:
     """
