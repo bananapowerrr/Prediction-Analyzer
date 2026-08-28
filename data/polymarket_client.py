@@ -9,6 +9,8 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_TIMEOUT = 30.0
 
+from .models import MarketSchema
+
 class PolymarketClient:
     """Клиент API Gamma/Polymarket для Prediction Analyzer."""
 
