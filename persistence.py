@@ -3,6 +3,7 @@ from typing import Dict, List
 import os
 import json
 import logging
+import tempfile
 
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
@@ -57,9 +58,10 @@ class PersistenceManager:
     def save_markets_json(self, path: str, markets: List[Dict]):
         """Сохранить список dict (id, question, liquidity, spread, volume_24h) в JSON UTF-8."""
         try:
-            os.makedirs(os.path.dirname(path), exist_ok=True)
-            with open(path, 'w', encoding='utf-8') as f:
-                json.dump(markets, f, ensure_ascii=False, indent=4)
+            with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as temp_file:
+                json.dump(markets, temp_file, ensure_ascii=False, indent=4)
+                temp_path = temp_file.name
+            os.replace(temp_path, path)
         except IOError as e:
             logger.error(f"Ошибка при сохранении файла {path}: {e}")
 
@@ -77,9 +79,10 @@ class PersistenceManager:
 def save_markets_json(path: str, markets: List[Dict]):
     """Сохранить список dict (id, question, liquidity, spread, volume_24h) в JSON UTF-8."""
     try:
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(markets, f, ensure_ascii=False, indent=4)
+        with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as temp_file:
+            json.dump(markets, temp_file, ensure_ascii=False, indent=4)
+            temp_path = temp_file.name
+        os.replace(temp_path, path)
     except IOError as e:
         logger.error(f"Ошибка при сохранении файла {path}: {e}")
 
