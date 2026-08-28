@@ -5,7 +5,6 @@ import json
 import logging
 import tempfile
 
-logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 class PersistenceManager:
