@@ -93,7 +93,7 @@ class PolymarketScanner(MarketScanner):
         self.client = client or PolymarketClient()
 
     @staticmethod
-    def _extract_spread(raw: dict) -> float:
+    def _extract_spread(raw: Dict[str, object]) -> float:
         spread = _to_float(raw.get("spread"), default=None)
         if spread is not None and spread > 0:
             return spread
@@ -179,7 +179,11 @@ def run_scan(min_liquidity: Optional[float] = None, max_spread: Optional[float] 
     if not markets:
         logger.warning("Нет рынков после фильтрации.")
     if sort_by_liquidity:
-        markets = sorted(markets, key=lambda m: (m.liquidity, m.volume_24h), reverse=True)
+        markets = sorted(
+            markets,
+            key=lambda m: (m.liquidity or 0.0, m.volume_24h or 0.0),
+            reverse=True,
+        )
     if limit is not None:
         markets = markets[:limit]
 
