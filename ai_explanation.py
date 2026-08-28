@@ -11,3 +11,14 @@ class AIExplanation:
             "summary": self.summary,
             "risk_factors": self.risk_factors
         }
+
+def format_explanation(market_question: str, action: str, confidence: float) -> str:
+    """
+    Форматирует объяснение для арбитража на русском языке.
+
+    :param market_question: Вопрос рынка
+    :param action: Действие (например, "Buy" или "Sell")
+    :param confidence: Уверенность в действиях
+    :return: Строка-пояснение
+    """
+    return f"Для вопроса рынка '{market_question}' рекомендуется {action} с уверенностью {confidence:.2f}%."
