@@ -1,3 +1,7 @@
+"""
+Сканер получает рынки через клиент Polymarket и отфильтровывает их гейтами Prediction Analyzer.
+"""
+
 from typing import List, Dict, Optional
 from dataclasses import dataclass
 from core.models import Market, MarketSchema
@@ -14,7 +18,7 @@ class ScanConfig:
     min_volume: Optional[float] = None
 
 class MarketScanner:
-    """Base class for ingesting and filtering prediction-market data.
+    """Сканер получает рынки через клиент Polymarket и отфильтровывает их гейтами Prediction Analyzer.
     
     Subclasses must implement :meth:`fetch_raw` (retrieve raw records from a
     data source) and :meth:`parse` (convert raw records into ``Market`` 
