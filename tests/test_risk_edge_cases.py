@@ -16,7 +16,7 @@ from risk_engine import (
 
 
 def _make_market(**kwargs):
-    base = dict(id="test_market", liquidity=1000.0, spread=0.05, volume=500.0)
+    base = dict(id="test_market", question="Test?", liquidity=1000.0, spread=0.05, volume_24h=500.0)
     base.update(kwargs)
     return Market(**base)
 

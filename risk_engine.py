@@ -1,13 +1,8 @@
 import math
-from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Tuple
+from dataclasses import dataclass
+from typing import Dict, Tuple
 
-@dataclass
-class Market:
-    id: str
-    liquidity: float
-    spread: float
-    volume: float
+from core.models import Market
 
 @dataclass
 class OutcomeAssessment:
@@ -56,7 +51,6 @@ def determine_position_size(market: Market, outcome_probabilities: Dict[str, flo
     return position_size
 
 def _z_score(confidence_level: float) -> float:
-    import math
     tail = (1.0 - confidence_level) / 2.0
     return -math.sqrt(2.0) * _erf_inv(2.0 * tail - 1.0)
 
