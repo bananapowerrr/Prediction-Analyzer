@@ -58,15 +58,15 @@ def calculate_fractional_kelly(market: Market, outcome_probabilities: Dict[str, 
 
     :param market: Маркет для расчета.
     :param outcome_probabilities: Словарь с вероятностями исходов.
-    :return: Фракционный Келли в диапазоне [0.0, 1.0].
+    :return: Фракционный Келли в диапазоне [0.0, 0.25].
     """
     ev = calculate_expected_value(market, outcome_probabilities)
     risk_free_rate = 0.01  # Примерный риск-фрийный процент
     denominator = market.spread * market.liquidity
-    if denominator == 0:
+    if denominator == 0 or ev <= 0:
         return 0.0
     kelly_fraction = (ev - risk_free_rate * market.liquidity) / denominator
-    return max(0, min(1, kelly_fraction))
+    return max(0, min(0.25, kelly_fraction))
 
 def determine_position_size(market: Market, outcome_probabilities: Dict[str, float], initial_capital: float, max_fraction: float = 0.25) -> float:
     """
