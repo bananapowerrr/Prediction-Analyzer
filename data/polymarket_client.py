@@ -9,12 +9,14 @@ from core.models import MarketSchema
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_TIMEOUT = 30.0
+
 class PolymarketClient:
     """Клиент Gamma/Polymarket API для Prediction Analyzer."""
     
     BASE = "https://api.polymarket.com"
     
-    def __init__(self, timeout: float = 30.0):
+    def __init__(self, timeout: float = DEFAULT_TIMEOUT):
         self.timeout = timeout
     
     async def fetch_markets(self, limit: int = 50) -> List[Dict]:
