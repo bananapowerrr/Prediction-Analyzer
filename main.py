@@ -69,13 +69,16 @@ def main() -> None:
     if args.json:
         json_output = []
         for m in markets:
-            json_output.append({
+            entry = {
                 "id": m.id,
                 "question": m.question,
                 "liquidity": m.liquidity,
                 "spread": m.spread,
                 "volume_24h": m.volume_24h
-            })
+            }
+            if hasattr(m, "score") and m.score is not None:
+                entry["score"] = m.score
+            json_output.append(entry)
         print(json.dumps(json_output, indent=4))
         if args.out:
             args.out.parent.mkdir(parents=True, exist_ok=True)
