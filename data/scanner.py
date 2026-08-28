@@ -177,7 +177,7 @@ def run_scan(min_liquidity: Optional[float] = None, max_spread: Optional[float] 
     if not markets:
         logger.warning("Нет рынков после фильтрации.")
     if sort_by_liquidity:
-        markets = sorted(markets, key=lambda m: m.liquidity, reverse=True)
+        markets = sorted(markets, key=lambda m: (m.liquidity, m.volume_24h), reverse=True)
     if limit is not None:
         markets = markets[:limit]
 
