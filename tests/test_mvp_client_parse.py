@@ -28,8 +28,10 @@ class TestMVPClientParse(unittest.TestCase):
         # Assert that the market_record contains the expected data
         self.assertEqual(market_record['id'], '123')
         self.assertEqual(market_record['question'], 'What will the weather be like tomorrow?')
-        self.assertEqual(market_record['liquidityNum'], 100000)
-        self.assertEqual(market_record['volume24hr'], 500000)
+        self.assertIsInstance(market_record['liquidityNum'], float)
+        self.assertIsInstance(market_record['volume24hr'], float)
+        self.assertEqual(market_record['liquidityNum'], 100000.0)
+        self.assertEqual(market_record['volume24hr'], 500000.0)
 
 if __name__ == '__main__':
     unittest.main()

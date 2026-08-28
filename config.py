@@ -116,14 +116,11 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-
 MIN_LIQUIDITY_USD = settings.liquidity_gate.min_liquidity_usd
 MAX_SPREAD_PCT = settings.spread.max_spread_pct
-SCAN_LIMIT = settings.connection.scan_limit
-GAMMA_API_BASE = settings.connection.gamma_api_base
 MIN_VOLUME_24H = settings.liquidity_gate.min_volume_24h
-HTTP_TIMEOUT = settings.connection.http_timeout
-
+SCAN_LIMIT = settings.connection.scan_limit
+APP_VERSION = settings.get("APP_VERSION", "0.1.0")
 
 config = settings
 
@@ -157,4 +154,4 @@ LOCAL_TEMPERATURE = settings.local.temperature
 
 APP_NAME = 'prediction-analyzer'
 APP_TITLE = 'Prediction Analyzer'
-APP_VERSION = '0.1.0'
+APP_VERSION = APP_VERSION

@@ -265,20 +265,17 @@ def _json_default(obj: Any) -> Any:
     def record_scan(self, total: int, passed: int) -> None:
         """Record the results of a scan."""
         with self._lock:
-            self._scan_stats = {
-                "total": total,
-                "passed": passed,
-                "failed": total - passed,
-                "timestamp": _dt.datetime.now().isoformat(timespec="seconds"),
-            }
-
-    def get_counters(self) -> Dict[str, int]:
-        """Get the current values of all counters."""
-        with self._lock:
-            return self._counters.copy()
+            if name not in self._counters:
+                self._counters[name] = 0
+            self._counters[name] += 1
 
     def dump_counters(self) -> Dict[str, int]:
         """Return a copy of all counters."""
+        with self._lock:
+            return self._counters.copy()
+
+    def get_counters(self) -> Dict[str, int]:
+        """Get the current values of all counters."""
         with self._lock:
             return self._counters.copy()
 

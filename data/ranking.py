@@ -7,12 +7,15 @@ def calculate_score(market: Market) -> float:
 
 
 def rank_markets(markets: Optional[List[Market]] = None) -> List[Market]:
-    if markets is None:
+    if not markets:
         return []
 
     for m in markets:
         setattr(m, "score", calculate_score(m))
 
-    sorted_markets = sorted(markets, key=lambda m: m.score, reverse=True)
+    def _ratio(m: Market) -> float:
+        if m.liquidity == 0:
+            return float("-inf")
+        return m.score / m.liquidity
 
-    return sorted_markets
+    return sorted(markets, key=_ratio, reverse=True)

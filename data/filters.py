@@ -23,6 +23,8 @@ def passes_volume_gate(market: Market, min_volume: float | None) -> bool:
     return market.volume_24h >= min_volume
 
 def passes_all_gates(market: Market, min_liquidity: float | None, max_spread: float | None, min_volume: float | None) -> bool:
+    if min_liquidity is None and max_spread is None and min_volume is None:
+        return True
     return (passes_liquidity_gate(market, min_liquidity) and
             passes_spread_gate(market, max_spread) and
             passes_volume_gate(market, min_volume))

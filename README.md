@@ -1,77 +1,114 @@
 # Prediction Analyzer
 
-Сканер и фильтр рынков предсказаний [Polymarket](https://polymarket.com): получает рынки через Gamma API и отсеивает их по ликвидности, спреду и объёму за 24 часа.
+Сканер рынков [Polymarket](https://polymarket.com): фильтрация по ликвидности, спреду и объёму через Gamma API.
 
-## Запуск
+## Установка
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env   # при необходимости настройте параметры
 ```
+
+## Команды
+
+| Команда | Описание |
+|---------|----------|
+| `scan` | Сканировать и отфильтровать рынки (по умолчанию) |
+| `rank` | Сканировать + ранжировать по скору |
+| `status` | Проверить готовность и текущую конфигурацию |
+| `version` | Версия приложения |
+
+## Примеры
 
 ```bash
-python main.py scan                                   # сканировать и отфильтровать рынки
-python main.py status                                 # проверить готовность
+python main.py scan                          # скан с параметрами по умолчанию
+python main.py rank --top 5                  # топ-5 рынков по скору
+python main.py scan --json --limit 10        # 10 рынков, вывод JSON
+python main.py status --json                 # статус в JSON
 ```
 
-### MVP: реальный скан
+## Флаги
 
-Быстрый запуск сканирования через Gamma API (без ключей):
+| Флаг | Назначение | По умолчанию |
+|------|------------|--------------|
+| `--min-liquidity USD` | Минимальная ликвидность | из `.env` |
+| `--max-spread PCT` | Максимальный спред, % | из `.env` |
+| `--min-volume USD` | Минимальный объём за 24 ч | из `.env` |
+| `--limit N` | Сколько рынков сканировать | из `.env` |
+| `--top N` | Показать N лучших | 20 |
+| `--json` | Вывод в JSON | — |
+| `--out PATH` | Сохранить JSON в файл | — |
 
-```bash
-python main.py scan --limit 5 --json
-```
+## Конфиг
 
-Команда берёт до 5 рынков из Gamma API и выводит отфильтрованный результат в JSON.
+Переменные задаются в `.env` (см. `.env.example`).
 
-Ключевые флаги команды `scan`:
+| Переменная | Описание | По умолчанию |
+|------------|----------|--------------|
+| `MIN_LIQUIDITY_USD` | Минимальная ликвидность, USD | 1000 |
+| `MAX_SPREAD_PCT` | Максимальный спред, % | 0.1 |
+| `SCAN_LIMIT` | Сколько рынков сканировать | 50 |
+| `MIN_VOLUME_24H` | Минимальный объём за 24 ч, USD | 0 |
 
-| Флаг | Назначение |
-|---|---|
-| `--min-liquidity USD` | Минимальная ликвидность в USD |
-| `--max-spread PCT` | Максимальный спред в процентах |
-| `--min-volume USD` | Минимальный объём за 24 ч |
-| `--limit N` | Лимит сканируемых рынков |
-| `--top N` | Сколько лучших рынков показать |
-| `--json` | Вывод в формате JSON |
-| `--out PATH` | Сохранить результаты (`--json`) в JSON-файл |
+### Polygon RPC
 
-## Конфигурация
+| Переменная | Описание | По умолчанию |
+|------------|----------|--------------|
+| `RPC_ENDPOINT` | Основной RPC-эндпоинт | `https://polygon-rpc.com` |
+| `RPC_ENDPOINTS` | Список RPC через запятую | `https://rpc.ankr.com/polygon,https://polygon.llamarpc.com` |
+| `RPC_CHAIN_ID` | Chain ID | 137 |
+| `RPC_PRIVATE_KEY` | Приватный ключ | — |
+| `RPC_COOLDOWN_SECONDS` | Пауза между повторными попытками | 60 |
+| `RPC_MAX_RETRIES` | Максимум повторов | 3 |
+| `RPC_TIMEOUT_SECONDS` | Таймаут запроса | 10 |
+| `RPC_REQUEST_TIMEOUT` | Таймаут ожидания ответа | 30 |
 
-`config.py` (pydantic-settings) читает [`.env`](.env.example) из корня проекта: `RPC_*`, `LIQUIDITY_*` (мин. ликвидность/объём), `SPREAD_*` (макс. спред), `CONN_*` (Gamma API, таймаут, лимит сканирования). Динамические настройки рантайма — `core/config.py` (ключ/значение, JSON).
+### Base RPC
 
-## Структура
+| Переменная | Описание | По умолчанию |
+|------------|----------|--------------|
+| `BASE_RPC_ENDPOINT` | Основной RPC-эндпоинт | `https://mainnet.base.org` |
+| `BASE_RPC_ENDPOINTS` | Список RPC через запятую | `https://mainnet.base.org` |
+| `BASE_RPC_CHAIN_ID` | Chain ID | 8453 |
+| `BASE_RPC_PRIVATE_KEY` | Приватный ключ | — |
+| `BASE_RPC_COOLDOWN_SECONDS` | Пауза между повторными попытками | 60 |
+| `BASE_RPC_MAX_RETRIES` | Максимум повторов | 3 |
+| `BASE_RPC_TIMEOUT_SECONDS` | Таймаут запроса | 10 |
+| `BASE_RPC_REQUEST_TIMEOUT` | Таймаут ожидания ответа | 30 |
 
-```
-desktop-tutorial/
-├── main.py                  # CLI-точка входа
-├── config.py                # настройки (pydantic-settings)
-├── risk_engine.py           # гейты риска и расчёт позиции
-├── state_manager.py         # хранилище состояния (SQLite)
-├── data/                    # получение и фильтрация рыночных данных
-│   ├── scanner.py           # MarketScanner / PolymarketScanner, run_scan
-│   ├── filters.py           # гейты ликвидности/спреда/объёма
-│   └── polymarket_client.py # клиент Gamma API
-├── core/                    # переиспользуемое ядро
-│   ├── config.py            # Config (key/value, JSON)
-│   ├── models.py            # Market, Order
-│   └── utils.py             # утилиты (clamp и др.)
-└── tests/                   # автономные тесты pytest
-```
+### Фильтры
 
-## Архитектура
+| Переменная | Описание | По умолчанию |
+|------------|----------|--------------|
+| `LIQUIDITY_MIN_LIQUIDITY_USD` | Минимальная ликвидность, USD | 1000 |
+| `LIQUIDITY_MIN_VOLUME_24H` | Минимальный объём за 24 ч, USD | 0 |
+| `SPREAD_MAX_SPREAD_PCT` | Максимальный спред, % | 0.1 |
 
-```
-data/ → filters → risk/signals → main
-```
+### Подключение
 
-- `data/` — получение рыночных данных (клиент Gamma API, сканер);
-- `filters` — гейты ликвидности, спреда и объёма;
-- `risk/signals` — гейты риска и сигналы;
-- `main` — CLI-точка входа, связывает все этапы.
+| Переменная | Описание | По умолчанию |
+|------------|----------|--------------|
+| `CONN_GAMMA_API_BASE` | Базовый URL Gamma API | `https://gamma-api.polymarket.com` |
+| `CONN_HTTP_TIMEOUT` | HTTP-таймаут | 30 |
+| `CONN_SCAN_LIMIT` | Лимит сканирования | 50 |
 
-## Тесты
+### Облачные LLM
 
-```bash
-pytest tests/ -q          # быстрый запуск всех тестов
-```
+| Переменная | Описание | По умолчанию |
+|------------|----------|--------------|
+| `CLOUD_GROQ_API_KEY` | API-ключ Groq | — |
+| `CLOUD_GROQ_MODEL` | Модель Groq | `llama-3.3-70b-versatile` |
+| `CLOUD_GEMINI_API_KEY` | API-ключ Gemini | — |
+| `CLOUD_GEMINI_MODEL` | Модель Gemini | `gemini-2.0-flash` |
+| `CLOUD_OPENROUTER_API_KEY` | API-ключ OpenRouter | — |
+| `CLOUD_OPENROUTER_MODEL` | Модель OpenRouter | `meta-llama/llama-3.3-70b-versatile` |
+| `CLOUD_TIMEOUT` | Таймаут запроса | 30 |
+| `CLOUD_MAX_CONCURRENT` | Макс. одновременных запросов | 5 |
+
+### Локальный LLM (Ollama)
+
+| Переменная | Описание | По умолчанию |
+|------------|----------|--------------|
+| `LOCAL_OLLAMA_BASE_URL` | URL Ollama | `http://localhost:11434` |
+| `LOCAL_JUDGE_MODEL` | Модель для оценки | `qwen2.5-coder:7b` |
+| `LOCAL_TIMEOUT` | Таймаут запроса | 120 |
+| `LOCAL_TEMPERATURE` | Температура генерации | 0.3 |
