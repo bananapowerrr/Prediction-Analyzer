@@ -36,6 +36,16 @@ class Order:
             f"side={self.side}, size={self.size}, price={self.price})"
         )
 
+    def to_dict(self) -> dict:
+        return {
+            "order_id": self.order_id,
+            "market_id": self.market_id,
+            "side": self.side,
+            "size": self.size,
+            "price": self.price,
+            "maker": self.maker,
+        }
+
 
 @dataclass
 class Market:
