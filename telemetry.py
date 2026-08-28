@@ -275,3 +275,8 @@ def _json_default(obj: Any) -> Any:
         """Get the statistics of the last scan."""
         with self._lock:
             return self._last_scan_stats
+
+    def dump_counters(self) -> Dict[str, int]:
+        """Return a copy of all counters."""
+        with self._lock:
+            return self._counters.copy()
