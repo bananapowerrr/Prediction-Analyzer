@@ -2,7 +2,6 @@
 Сканер получает рынки через клиент Polymarket и отфильтровывает их гейтами Prediction Analyzer.
 """
 
-import inspect
 import logging
 from dataclasses import dataclass
 from typing import List, Optional
@@ -14,6 +13,7 @@ from config import MAX_SPREAD_PCT, MIN_LIQUIDITY_USD, MIN_VOLUME_24H, SCAN_LIMIT
 from core.models import Market, MarketSchema
 from data.filters import passes_all_gates
 from data.polymarket_client import PolymarketClient
+import inspect  # Добавлен импорт модуля inspect
 
 logger = logging.getLogger(__name__)
 
@@ -141,11 +141,6 @@ class PolymarketScanner(MarketScanner):
             except Exception as e:
                 logger.warning(f"Пропускаю некорректную запись рынка #{i}: {e}")
         return markets
-
-
-def filter_by_volume_threshold(markets: List[Market], min_volume: float) -> List[Market]:
-    """Возвращает рынки, чей объём за 24 часа не ниже порога."""
-    return [m for m in markets if m.volume_24h >= min_volume]
 
 
 def scan_markets(min_liquidity: Optional[float] = None, max_spread: Optional[float] = None, min_volume: Optional[float] = None, limit: Optional[int] = None) -> List[Market]:
