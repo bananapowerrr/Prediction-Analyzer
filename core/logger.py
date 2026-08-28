@@ -1,9 +1,7 @@
-"""Centralized application logging configuration.
+"""Конфигурация централизованного логирования приложения.
 
-Provides ``setup_logging`` to configure the root logger with a console
-handler and a rotating file handler, each using a configurable formatter and
-log level. Modules across the application should obtain loggers via
-``logging.getLogger(__name__)`` so they inherit this configuration.
+Настройка корневого логгера с обработчиками консоли и вращающегося файла.
+Модули получают логгеры через ``logging.getLogger(__name__)``.
 """
 
 from __future__ import annotations
@@ -50,25 +48,25 @@ def setup_logging(
     file_format: str = FILE_FORMAT,
     propagate_root: bool = True,
 ) -> logging.Logger:
-    """Configure the root logger with console and rotating file handlers.
+    """Настройка корневого логгера с обработчиками консоли и вращающегося файла.
 
-    Calling this more than once is safe: it rebuilds the handler set so the
-    configuration can be refreshed (e.g. with values from the app settings).
+    Вызов этой функции более одного раза безопасен: она перестраивает набор обработчиков,
+    чтобы можно было обновить конфигурацию (например, со значениями из настроек приложения).
 
     Args:
-        level: Base log level applied to the root logger.
-        log_dir: Directory where the rotating log file is written.
-        log_file: Name of the rotating log file.
-        max_bytes: Maximum size of a single log file before rotation.
-        backup_count: Number of rotated backup files to keep.
-        console_level: Override level for the console handler.
-        file_level: Override level for the file handler.
-        console_format: Format string for the console handler.
-        file_format: Format string for the file handler.
-        propagate_root: Whether child loggers propagate to the root logger.
+        level: Основной уровень логирования для корневого логгера.
+        log_dir: Директория, где записывается вращающийся файл логов.
+        log_file: Имя вращающегося файла логов.
+        max_bytes: Максимальный размер одного файла логов перед вращением.
+        backup_count: Количество резервных файлов логов для сохранения.
+        console_level: Переопределенный уровень для обработчика консоли.
+        file_level: Переопределенный уровень для обработчика файла.
+        console_format: Формат строки для обработчика консоли.
+        file_format: Формат строки для обработчика файла.
+        propagate_root: Позволяет ли дочерним логгерам передавать сообщения корневому логгеру.
 
     Returns:
-        The configured root logger.
+        Настроенный корневой логгер.
     """
     global _CONFIGURED
 
@@ -100,7 +98,7 @@ def setup_logging(
         file_handler.setFormatter(file_fmt)
         root.addHandler(file_handler)
     except OSError as exc:
-        root.warning("Could not attach rotating file handler (%s); continuing with console only", exc)
+        root.warning("Не удалось прикрепить обработчик вращающегося файла (%s); продолжаем только с консолью", exc)
 
     root.propagate = propagate_root
     _CONFIGURED = True
@@ -108,14 +106,14 @@ def setup_logging(
 
 
 def get_logger(name: Optional[str] = None) -> logging.Logger:
-    """Return a logger, configuring centralized logging on first use."""
+    """Возвращает логгер, настраивая централизованное логирование при первом использовании."""
     if not _CONFIGURED:
         setup_logging()
     return logging.getLogger(name)
 
 
 def reset() -> None:
-    """Remove all handlers and reset the configured flag (mostly for tests)."""
+    """Удаляет все обработчики и сбрасывает флаг настроек (для тестов)."""
     global _CONFIGURED
     root = logging.getLogger()
     for handler in list(root.handlers):
