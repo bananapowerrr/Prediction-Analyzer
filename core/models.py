@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Any
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -170,7 +170,7 @@ class QuantitativeSignalSchema(BaseModel):
         )
 
 
-def validate_market_data(data: Dict) -> Market:
+def validate_market_data(data: Dict[str, Any]) -> Market:
     """
     Валидация данных рынка.
     """
@@ -178,7 +178,7 @@ def validate_market_data(data: Dict) -> Market:
     return schema.to_market()
 
 
-def validate_order_data(data: Dict) -> Order:
+def validate_order_data(data: Dict[str, Any]) -> Order:
     """
     Валидация данных заказа.
     """
@@ -186,7 +186,7 @@ def validate_order_data(data: Dict) -> Order:
     return schema.to_order()
 
 
-def validate_signal_data(data: Dict) -> QuantitativeSignal:
+def validate_signal_data(data: Dict[str, Any]) -> QuantitativeSignal:
     """
     Валидация количественного сигнала.
     """
