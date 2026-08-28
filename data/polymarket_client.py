@@ -24,11 +24,13 @@ class PolymarketClient:
             "Accept": "application/json"
         }
 
-    async def fetch_markets(self, limit: int = 50) -> List[Dict]:
+    def fetch_markets(self, limit: int = 50) -> List[Dict]:
         logger.debug("Fetching markets (limit=%d) from %s", limit, self.BASE)
         attempts = 3
         for attempt in range(1, attempts + 1):
             try:
+                # Clamp limit to the range 1..500
+                limit = max(1, min(500, limit))
                 response = requests.get(
                     f"{self.BASE}/markets",
                     params={"limit": limit},
