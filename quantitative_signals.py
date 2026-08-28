@@ -102,5 +102,5 @@ def compute_signals(markets: List[Dict[str, Any]]) -> List[QuantitativeSignal]:
         try:
             signals.extend(generate_quantitative_signals(market))
         except Exception as e:
-            logger.error(f"Error generating signals for market {market}: {e}")
+            logger.error(f"Ошибка при генерации сигналов для рынка {market}: {e}")
     return signals
