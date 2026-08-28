@@ -1,15 +1,37 @@
+import logging
+
+# Константы
+BALANCE_DEFAULT = 10000.0
+
 class PaperBroker:
-    def __init__(self, balance: float = 10000.0):
+    """
+    Класс для имитации работы брокера на бумаге.
+
+    Этот класс позволяет создавать и выполнять сделки, отслеживать позиции и сбрасывать состояние брокера.
+    """
+
+    def __init__(self, balance: float = BALANCE_DEFAULT):
+        """
+        Инициализирует объект PaperBroker с заданным балансом.
+
+        :param balance: Начальный баланс брокера
+        """
         self._balance = balance
         self.orders = {}
         self.positions = {}
 
     @property
     def balance(self) -> float:
+        """
+        Возвращает текущий баланс брокера.
+
+        :return: Текущий баланс
+        """
         return self._balance
 
     def place_order(self, market_id: str, side: str, size: float, price: float) -> dict:
-        """Создает и выполняет заказ.
+        """
+        Создает и выполняет заказ.
 
         :param market_id: ID рынка
         :param side: Сторона сделки ('buy' или 'sell')
@@ -19,6 +41,10 @@ class PaperBroker:
         """
         if side not in ['buy', 'sell']:
             raise ValueError("Недопустимое значение для side. Допустимые значения: 'buy' или 'sell'")
+        if size <= 0:
+            raise ValueError("Размер сделки должен быть положительным")
+        if price <= 0:
+            raise ValueError("Цена сделки должна быть положительной")
         cost = size * price
         if self._balance < cost:
             raise ValueError("Недостаточно средств")
@@ -36,7 +62,8 @@ class PaperBroker:
         return {'id': order_id, 'status': 'filled', 'pnl': 0}
 
     def _update_position(self, market_id: str, side: str, size: float, price: float):
-        """Обновляет позиции после выполнения сделки.
+        """
+        Обновляет позиции после выполнения сделки.
 
         :param market_id: ID рынка
         :param side: Сторона сделки ('buy' или 'sell')
@@ -58,14 +85,16 @@ class PaperBroker:
             pos['avg_price'] = 0
 
     def get_positions(self) -> list:
-        """Возвращает список открытых позиций.
+        """
+        Возвращает список открытых позиций.
 
         :return: Список позиций
         """
         return [{'market_id': m, **p} for m, p in self.positions.items() if p['size'] != 0]
 
-    def reset(self, balance: float = 10000.0):
-        """Сбрасывает состояние брокера.
+    def reset(self, balance: float = BALANCE_DEFAULT):
+        """
+        Сбрасывает состояние брокера.
 
         :param balance: Начальный баланс
         """
@@ -74,7 +103,8 @@ class PaperBroker:
         self.positions = {}
 
     def cancel(self, order_id: str) -> bool:
-        """Отменяет заказ.
+        """
+        Отменяет заказ.
 
         :param order_id: ID заказа
         :return: True если заказ отменен, False если заказ не найден
@@ -91,7 +121,8 @@ class PaperBroker:
         return False
 
     def snapshot(self) -> dict:
-        """Создает снимок состояния брокера.
+        """
+        Создает снимок состояния брокера.
 
         :return: Словарь с состоянием брокера
         """
