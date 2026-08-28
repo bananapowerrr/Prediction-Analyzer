@@ -1,6 +1,6 @@
 import math
 from dataclasses import dataclass
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Optional
 
 from core.models import Market
 
