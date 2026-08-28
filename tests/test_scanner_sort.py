@@ -8,10 +8,14 @@
 import unittest
 from unittest.mock import patch
 from typing import List
+import logging
 
 from core.models import Market
 from data.scanner import MarketScanner, ScanConfig, run_scan
 
+# Настройка логирования
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 def _make_market(market_id: str, liquidity: float) -> Market:
     return Market(
@@ -36,27 +40,43 @@ class TestRunScanSortByLiquidity(unittest.TestCase):
     @patch.object(MarketScanner, "scan")
     def test_sorts_by_liquidity_descending(self, mock_scan: patch):
         mock_scan.return_value = self.markets
-        result = run_scan(sort_by_liquidity=True)
-        self.assertEqual([m.id for m in result], ["m3", "m1", "m2"])
-        self.assertEqual([m.liquidity for m in result], [20.0, 10.0, 5.0])
+        try:
+            result = run_scan(sort_by_liquidity=True)
+            self.assertEqual([m.id for m in result], ["m3", "m1", "m2"])
+            self.assertEqual([m.liquidity for m in result], [20.0, 10.0, 5.0])
+        except Exception as e:
+            logger.exception("Exception occurred during test_sorts_by_liquidity_descending")
+            raise
 
     @patch.object(MarketScanner, "scan")
     def test_sort_is_default(self, mock_scan: patch):
         mock_scan.return_value = self.markets
-        result = run_scan()
-        self.assertEqual([m.id for m in result], ["m3", "m1", "m2"])
+        try:
+            result = run_scan()
+            self.assertEqual([m.id for m in result], ["m3", "m1", "m2"])
+        except Exception as e:
+            logger.exception("Exception occurred during test_sort_is_default")
+            raise
 
     @patch.object(MarketScanner, "scan")
     def test_disabled_sort_preserves_scan_order(self, mock_scan: patch):
         mock_scan.return_value = self.markets
-        result = run_scan(sort_by_liquidity=False)
-        self.assertEqual([m.id for m in result], ["m1", "m2", "m3"])
+        try:
+            result = run_scan(sort_by_liquidity=False)
+            self.assertEqual([m.id for m in result], ["m1", "m2", "m3"])
+        except Exception as e:
+            logger.exception("Exception occurred during test_disabled_sort_preserves_scan_order")
+            raise
 
     @patch.object(MarketScanner, "scan")
     def test_limit_applied_after_sort(self, mock_scan: patch):
         mock_scan.return_value = self.markets
-        result = run_scan(sort_by_liquidity=True, limit=2)
-        self.assertEqual([m.id for m in result], ["m3", "m1"])
+        try:
+            result = run_scan(sort_by_liquidity=True, limit=2)
+            self.assertEqual([m.id for m in result], ["m3", "m1"])
+        except Exception as e:
+            logger.exception("Exception occurred during test_limit_applied_after_sort")
+            raise
 
     @patch.object(MarketScanner, "scan")
     def test_stable_sort_keeps_relative_order_for_equal_liquidity(self, mock_scan: patch):
@@ -65,13 +85,21 @@ class TestRunScanSortByLiquidity(unittest.TestCase):
             _make_market("b", 7.0),
             _make_market("c", 1.0),
         ]
-        result = run_scan(sort_by_liquidity=True)
-        self.assertEqual([m.id for m in result], ["a", "b", "c"])
+        try:
+            result = run_scan(sort_by_liquidity=True)
+            self.assertEqual([m.id for m in result], ["a", "b", "c"])
+        except Exception as e:
+            logger.exception("Exception occurred during test_stable_sort_keeps_relative_order_for_equal_liquidity")
+            raise
 
     @patch.object(MarketScanner, "scan")
     def test_empty_scan_returns_empty_list(self, mock_scan: patch):
         mock_scan.return_value = []
-        self.assertEqual(run_scan(sort_by_liquidity=True), [])
+        try:
+            self.assertEqual(run_scan(sort_by_liquidity=True), [])
+        except Exception as e:
+            logger.exception("Exception occurred during test_empty_scan_returns_empty_list")
+            raise
 
 
 class TestScanConfigSortIntegration(unittest.TestCase):
@@ -81,19 +109,23 @@ class TestScanConfigSortIntegration(unittest.TestCase):
     @patch("data.scanner.MarketScanner")
     def test_run_scan_passes_config_to_scanner(self, MockScanner: patch, mock_scan: patch):
         MockScanner.return_value.scan.return_value = []
-        run_scan(
-            min_liquidity=500.0,
-            max_spread=0.05,
-            min_volume=100.0,
-            limit=10,
-            sort_by_liquidity=True,
-        )
-        args, kwargs = MockScanner.call_args
-        cfg = kwargs["scan_config"] if "scan_config" in kwargs else args[0]
-        self.assertIsInstance(cfg, ScanConfig)
-        self.assertEqual(cfg.min_liquidity, 500.0)
-        self.assertEqual(cfg.max_spread, 0.05)
-        self.assertEqual(cfg.min_volume, 100.0)
+        try:
+            run_scan(
+                min_liquidity=500.0,
+                max_spread=0.05,
+                min_volume=100.0,
+                limit=10,
+                sort_by_liquidity=True,
+            )
+            args, kwargs = MockScanner.call_args
+            cfg = kwargs["scan_config"] if "scan_config" in kwargs else args[0]
+            self.assertIsInstance(cfg, ScanConfig)
+            self.assertEqual(cfg.min_liquidity, 500.0)
+            self.assertEqual(cfg.max_spread, 0.05)
+            self.assertEqual(cfg.min_volume, 100.0)
+        except Exception as e:
+            logger.exception("Exception occurred during test_run_scan_passes_config_to_scanner")
+            raise
 
 
 class TestSortedLogicHelper(unittest.TestCase):
@@ -113,16 +145,28 @@ class TestSortedLogicHelper(unittest.TestCase):
             _make_market("y", 9.0),
             _make_market("z", 1.0),
         ]
-        result = self._sort_by_liquidity(markets)
-        self.assertEqual([m.id for m in result], ["y", "x", "z"])
+        try:
+            result = self._sort_by_liquidity(markets)
+            self.assertEqual([m.id for m in result], ["y", "x", "z"])
+        except Exception as e:
+            logger.exception("Exception occurred during test_helper_sorts_descending")
+            raise
 
     def test_helper_is_stable_for_equal_liquidity(self):
         markets = [_make_market("a", 4.0), _make_market("b", 4.0), _make_market("c", 2.0)]
-        result = self._sort_by_liquidity(markets)
-        self.assertEqual([m.id for m in result], ["a", "b", "c"])
+        try:
+            result = self._sort_by_liquidity(markets)
+            self.assertEqual([m.id for m in result], ["a", "b", "c"])
+        except Exception as e:
+            logger.exception("Exception occurred during test_helper_is_stable_for_equal_liquidity")
+            raise
 
     def test_helper_empty(self):
-        self.assertEqual(self._sort_by_liquidity([]), [])
+        try:
+            self.assertEqual(self._sort_by_liquidity([]), [])
+        except Exception as e:
+            logger.exception("Exception occurred during test_helper_empty")
+            raise
 
 
 if __name__ == "__main__":
