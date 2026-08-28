@@ -20,9 +20,14 @@ def generate_quantitative_signals(market_data: Dict[str, Any]) -> List[Quantitat
     Пример логики для генерации сигналов на основе данных рынка.
     """
     signals = []
-    if market_data["price"] > market_data["moving_average"]:
+    price = market_data.get("price", None)
+    moving_average = market_data.get("moving_average", None)
+    
+    if price is None or moving_average is None:
+        signals.append(QuantitativeSignal(action="hold", confidence=0.5))
+    elif price > moving_average:
         signals.append(QuantitativeSignal(action="buy", confidence=0.8))
-    elif market_data["price"] < market_data["moving_average"]:
+    elif price < moving_average:
         signals.append(QuantitativeSignal(action="sell", confidence=0.8))
     else:
         signals.append(QuantitativeSignal(action="hold", confidence=0.5))
