@@ -2,12 +2,19 @@ import sqlite3
 from typing import List, Dict, Set
 
 class StateManager:
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(StateManager, cls).__new__(cls, *args, **kwargs)
+            cls._instance.recent_markets: Set[str] = set()
+        return cls._instance
+
     def __init__(self, db_path: str):
         self.db_path = db_path
         self.conn = sqlite3.connect(db_path)
         self.cursor = self.conn.cursor()
         self._create_table()
-        self.recent_markets: Set[str] = set()
 
     def _create_table(self):
         self.cursor.execute('''
@@ -49,3 +56,6 @@ class StateManager:
 
     def close(self):
         self.conn.close()
+
+def get_default_state() -> StateManager:
+    return StateManager(db_path="default_state.db")
