@@ -131,7 +131,7 @@ class PolymarketScanner(MarketScanner):
             normalized = {
                 "id": str(market_id),
                 "question": record.get("question") or "Unknown",
-                "liquidity": _to_float(record.get("liquidity"), default=0.0),
+                "liquidity": _to_float(record.get('liquidity') or record.get('liquidityNum'), default=0.0),
                 "spread": self._extract_spread(record),
                 "volume_24h": _to_float(volume_24h, default=0.0),
             }
