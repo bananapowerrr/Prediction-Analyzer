@@ -11,7 +11,7 @@ def main() -> None:
         logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 
     parser = argparse.ArgumentParser(description="Prediction Analyzer — сканер рынков Polymarket")
-    parser.add_argument("command", nargs="?", default="scan", choices=["scan", "status"], help="Команда для выполнения")
+    parser.add_argument("command", nargs="?", default="scan", choices=["scan", "status", "version"], help="Команда для выполнения")
     parser.add_argument("--min-liquidity", type=float, default=MIN_LIQUIDITY_USD, help="Минимальная ликвидность в USD")
     parser.add_argument("--max-spread", type=float, default=MAX_SPREAD_PCT, help="Максимальный спред в процентах")
     parser.add_argument("--min-volume", type=float, default=MIN_VOLUME_24H, help="Минимальный объем за 24 часа")
@@ -20,6 +20,10 @@ def main() -> None:
     parser.add_argument("--top", type=int, default=20, help="Количество верхних рынков для отображения")
     parser.add_argument("--out", type=Path, help="Путь для сохранения результатов в JSON файл")
     args = parser.parse_args()
+
+    if args.command == "version":
+        print("Prediction Analyzer 0.1.0")
+        return
 
     if args.command == "status":
         if args.json:
