@@ -20,3 +20,25 @@ class UnifiedDecision:
             "final_decision": self.final_decision,
             "reasoning": self.reasoning
         }
+
+def pipeline_decide(market: Dict[str, Any], signal_action: str, risk_ok: bool) -> Dict[str, Any]:
+    """
+    Определяет действие на основе анализа и вердикта.
+
+    :param market: Словарь с данными рынка.
+    :param signal_action: Действие, полученное от сигнальной системы.
+    :param risk_ok: Флаг, указывающий на допустимость риска.
+    :return: Словарь с ключами action, execute (bool) и reason (str).
+    """
+    decision = {
+        "action": signal_action,
+        "execute": False,
+        "reason": "Недостаточно данных для принятия решения"
+    }
+
+    # Пример логики для принятия решения
+    if risk_ok:
+        decision["execute"] = True
+        decision["reason"] = "Риск допустим, действие разрешено"
+
+    return decision
