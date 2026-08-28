@@ -4,7 +4,7 @@ from mvp_client import MVPClient
 
 class TestMVPClientParse(unittest.TestCase):
     @patch('mvp_client.MVPClient.fetch_market_details')
-    def test_parse_market_record(self, mock_fetch_market_details):
+    def test_parse_market_record(self, mock_fetch_market_details) -> None:
         """Тестирование метода parse_market_record."""
         mock_data = {
             'id': '123',

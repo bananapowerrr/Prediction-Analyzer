@@ -29,8 +29,6 @@ class PolymarketClient:
 
     def fetch_markets(self, limit: int = 50) -> List[Dict]:
         """Получает список рынков с ограничением на количество."""
-        if limit is None:
-            limit = 50
         logger.debug("Загружаем рынки (лимит=%d) с %s", limit, self.BASE)
         attempts = 3
         response = None
