@@ -61,6 +61,13 @@ class Market:
             f"volume_24h={self.volume_24h})"
         )
 
+    def is_tradeable(self, min_liq: float, max_sp: float, min_vol: float) -> bool:
+        return (
+            self.liquidity >= min_liq
+            and self.spread <= max_sp
+            and self.volume_24h >= min_vol
+        )
+
 
 @dataclass
 class QuantitativeSignal:
