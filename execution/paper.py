@@ -9,6 +9,8 @@ class PaperBroker:
         return self._balance
 
     def place_order(self, market_id: str, side: str, size: float, price: float) -> dict:
+        if side not in ['buy', 'sell']:
+            raise ValueError("Недопустимое значение для side. Допустимые значения: 'buy' или 'sell'")
         cost = size * price
         if self._balance < cost:
             raise ValueError("Недостаточно средств")
