@@ -52,7 +52,7 @@ def main() -> None:
         Path("errors").mkdir(parents=True, exist_ok=True)
         with open("errors/scan_error.log", "w", encoding="utf-8") as f:
             f.write(f"Ошибка сканирования: {e}")
-        return
+        markets = []
 
     if args.command == "rank":
         try:
@@ -62,7 +62,7 @@ def main() -> None:
             Path("errors").mkdir(parents=True, exist_ok=True)
             with open("errors/rank_error.log", "w", encoding="utf-8") as f:
                 f.write(f"Ошибка сортировки: {e}")
-            return
+            markets = []
 
     if args.json:
         json_output = []
