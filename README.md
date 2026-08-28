@@ -63,6 +63,5 @@ data/ → filters → risk/signals → main
 ## Тесты
 
 ```bash
-python -m pytest          # все тесты
-python -m pytest -v       # подробный вывод
+pytest tests/ -q          # быстрый запуск всех тестов
 ```

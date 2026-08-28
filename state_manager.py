@@ -1,6 +1,8 @@
 import sqlite3
 from typing import List, Dict, Set
 
+MAX_RECENT = 500
+
 class StateManager:
     _instance = None
 
@@ -70,7 +72,7 @@ class StateManager:
         :param ids: Список market id
         """
         self.recent_markets.update(ids)
-        if len(self.recent_markets) > 500:
+        if len(self.recent_markets) > MAX_RECENT:
             self.recent_markets.discard(next(iter(self.recent_markets)))
 
     def seen_recently(self, market_id: str) -> bool:
