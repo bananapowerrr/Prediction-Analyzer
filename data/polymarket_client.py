@@ -17,6 +17,7 @@ class PolymarketClient:
 
     def __init__(self, timeout: float = DEFAULT_TIMEOUT):
         self.timeout = timeout
+        self.session = requests.Session()
 
     def _headers(self) -> Dict[str, str]:
         return {
@@ -31,7 +32,7 @@ class PolymarketClient:
             try:
                 # Clamp limit to the range 1..500
                 limit = max(1, min(500, limit))
-                response = requests.get(
+                response = self.session.get(
                     f"{self.BASE}/markets",
                     params={"limit": limit},
                     headers=self._headers(),
@@ -59,7 +60,7 @@ class PolymarketClient:
         attempts = 3
         for attempt in range(1, attempts + 1):
             try:
-                response = requests.get(
+                response = self.session.get(
                     f"{self.BASE}/markets/{market_id}",
                     headers=self._headers(),
                     timeout=self.timeout
@@ -86,7 +87,7 @@ class PolymarketClient:
         attempts = 3
         for attempt in range(1, attempts + 1):
             try:
-                response = requests.get(
+                response = self.session.get(
                     f"{self.BASE}/prices",
                     headers=self._headers(),
                     timeout=self.timeout
@@ -113,7 +114,7 @@ class PolymarketClient:
         attempts = 3
         for attempt in range(1, attempts + 1):
             try:
-                response = requests.get(
+                response = self.session.get(
                     f"{self.BASE}/spreads",
                     headers=self._headers(),
                     timeout=self.timeout
@@ -140,7 +141,7 @@ class PolymarketClient:
         attempts = 3
         for attempt in range(1, attempts + 1):
             try:
-                response = requests.get(
+                response = self.session.get(
                     f"{self.BASE}/volumes",
                     headers=self._headers(),
                     timeout=self.timeout
@@ -163,7 +164,7 @@ class PolymarketClient:
                 return {}
 
     def close(self):
-        pass
+        self.session.close()
 
 
 class PolymarketAdapter:
