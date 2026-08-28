@@ -113,23 +113,3 @@ def _to_dict(obj):
     if isinstance(obj, dict):
         return obj
     return getattr(obj, '__dict__', obj)
-
-def save_markets_json(markets: List[Dict], path: str):
-    """Сохраняет список рынков в JSON файл."""
-    if not markets or not path:
-        raise ValueError("markets и path должны быть предоставлены")
-    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
-    data = [_to_dict(m) for m in markets]
-    with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as tmp:
-        json.dump(data, tmp, ensure_ascii=False, indent=4)
-    os.replace(tmp.name, path)
-
-def load_markets_json(path: str) -> List[Dict]:
-    """Загружает список рынков из JSON файла."""
-    if not path:
-        raise ValueError("path должен быть предоставлен")
-    try:
-        with open(path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
