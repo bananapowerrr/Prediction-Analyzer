@@ -1,7 +1,7 @@
 import unittest
 
 from core.models import Market
-from data.filters import filter_markets, passes_all_gates
+from data.filters import passes_all_gates, filter_markets
 
 
 class TestFiltersGates(unittest.TestCase):
