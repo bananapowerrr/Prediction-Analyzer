@@ -62,3 +62,12 @@ class MarketScanner:
         filtered = self.filter_markets(markets)
         logger.info("Passed gates: %d/%d", len(filtered), len(markets))
         return filtered
+
+def run_scan(min_liquidity: Optional[float] = None, max_spread: Optional[float] = None, min_volume: Optional[float] = None, limit: Optional[int] = None, sort_by_liquidity: bool = True) -> List[Market]:
+    scanner = MarketScanner(ScanConfig(min_liquidity=min_liquidity, max_spread=max_spread, min_volume=min_volume))
+    markets = scanner.scan()
+    if limit is not None:
+        markets = markets[:limit]
+    if sort_by_liquidity:
+        markets = sorted(markets, key=lambda m: m.liquidity, reverse=True)
+    return markets
