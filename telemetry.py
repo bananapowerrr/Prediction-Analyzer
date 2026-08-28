@@ -50,6 +50,7 @@ class Telemetry:
         self._ensured = False
         self._counters = {}
         self._last_scan_stats: Optional[Dict[str, Any]] = None
+        self._scan_stats: Optional[Dict[str, Any]] = None
 
     # ------------------------------------------------------------------ #
     # Filesystem helpers
@@ -264,19 +265,38 @@ def _json_default(obj: Any) -> Any:
     def record_scan(self, total: int, passed: int) -> None:
         """Record the results of a scan."""
         with self._lock:
-            self._last_scan_stats = {
+            self._scan_stats = {
                 "total": total,
                 "passed": passed,
                 "failed": total - passed,
                 "timestamp": _dt.datetime.now().isoformat(timespec="seconds"),
             }
 
-    def last_scan_stats(self) -> Optional[Dict[str, Any]]:
-        """Get the statistics of the last scan."""
+    def get_counters(self) -> Dict[str, int]:
+        """Get the current values of all counters."""
         with self._lock:
-            return self._last_scan_stats
+            return self._counters.copy()
 
     def dump_counters(self) -> Dict[str, int]:
         """Return a copy of all counters."""
         with self._lock:
             return self._counters.copy()
+
+    def last_scan_stats(self) -> Optional[Dict[str, Any]]:
+        """Get the statistics of the last scan."""
+        with self._lock:
+            return self._scan_stats
+
+    def dump_json(self, path: str) -> None:
+        """Write the current state and counters to a JSON file."""
+        self._ensure_dir()
+        payload = {
+            "type": "telemetry_dump",
+            "app_name": self.app_name,
+            "timestamp": _dt.datetime.now().isoformat(timespec="seconds"),
+            "system_state": self.get_system_state(),
+            "counters": self.get_counters(),
+            "scan_stats": self.last_scan_stats(),
+        }
+        self._write_json(path, payload)
+        logger.info("Telemetry data dumped to %s", path)
