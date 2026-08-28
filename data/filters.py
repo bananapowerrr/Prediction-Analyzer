@@ -7,21 +7,27 @@ filter_markets фильтрует рынки, проходящие все три
 from __future__ import annotations
 from core.models import Market
 
-def passes_liquidity_gate(market: Market, min_liquidity: float) -> bool:
+def passes_liquidity_gate(market: Market, min_liquidity: float | None) -> bool:
+    if min_liquidity is None:
+        return True
     return market.liquidity >= min_liquidity
 
-def passes_spread_gate(market: Market, max_spread: float) -> bool:
+def passes_spread_gate(market: Market, max_spread: float | None) -> bool:
+    if max_spread is None:
+        return True
     return market.spread <= max_spread
 
-def passes_volume_gate(market: Market, min_volume: float) -> bool:
+def passes_volume_gate(market: Market, min_volume: float | None) -> bool:
+    if min_volume is None:
+        return True
     return market.volume_24h >= min_volume
 
-def passes_all_gates(market: Market, min_liquidity: float, max_spread: float, min_volume: float) -> bool:
+def passes_all_gates(market: Market, min_liquidity: float | None, max_spread: float | None, min_volume: float | None) -> bool:
     return (passes_liquidity_gate(market, min_liquidity) and
             passes_spread_gate(market, max_spread) and
             passes_volume_gate(market, min_volume))
 
-def gate_reject_reasons(market: Market, min_liquidity: float, max_spread: float, min_volume: float) -> list[str]:
+def gate_reject_reasons(market: Market, min_liquidity: float | None, max_spread: float | None, min_volume: float | None) -> list[str]:
     reasons = []
     if not passes_liquidity_gate(market, min_liquidity):
         reasons.append('low_liquidity')
@@ -31,7 +37,7 @@ def gate_reject_reasons(market: Market, min_liquidity: float, max_spread: float,
         reasons.append('low_volume')
     return reasons
 
-def filter_markets(markets: list[Market], min_liquidity: float, max_spread: float, min_volume: float) -> list[Market]:
+def filter_markets(markets: list[Market], min_liquidity: float | None, max_spread: float | None, min_volume: float | None) -> list[Market]:
     """
     Фильтрует рынки, проходящие все три гейта.
 
@@ -43,10 +49,10 @@ def filter_markets(markets: list[Market], min_liquidity: float, max_spread: floa
     """
     return [market for market in markets if passes_all_gates(market, min_liquidity, max_spread, min_volume)]
 
-def passes_soft_gates(market: Market, min_liquidity: float, max_spread: float, min_volume: float) -> bool:
+def passes_soft_gates(market: Market, min_liquidity: float | None, max_spread: float | None, min_volume: float | None) -> bool:
     return (passes_liquidity_gate(market, min_liquidity * 0.5) and
             passes_spread_gate(market, max_spread * 1.5) and
             passes_volume_gate(market, min_volume * 0.5))
 
-def count_passing(markets: list[Market], min_liquidity: float, max_spread: float, min_volume: float) -> int:
+def count_passing(markets: list[Market], min_liquidity: float | None, max_spread: float | None, min_volume: float | None) -> int:
     return len(filter_markets(markets, min_liquidity, max_spread, min_volume))
