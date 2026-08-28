@@ -4,9 +4,9 @@ from typing import Any
 
 def echo_analysis(text: str) -> str:
     """
-    Простая функция, которая добавляет префикс '[PA]' к входному тексту.
+    Простая функция, которая возвращает входной текст без изменений.
 
     :param text: Входной текст.
-    :return: Текст с префиксом '[PA]'.
+    :return: Входной текст.
     """
-    return '[PA] ' + text
+    return text
