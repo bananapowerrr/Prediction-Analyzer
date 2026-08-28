@@ -5,6 +5,10 @@ from typing import Dict, Optional, List
 from pydantic import BaseModel, Field, field_validator
 
 
+"""
+Модели Market, Order, сигналы и pydantic-схемы валидации.
+"""
+
 @dataclass
 class Order:
     order_id: str
