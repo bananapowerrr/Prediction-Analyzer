@@ -53,4 +53,4 @@ def test_all_numeric_constants_are_finite():
 
 def test_all_numeric_constants_are_non_negative():
     for constant in NUMERIC_CONSTANTS:
-        assert constant >= 0, f"Ожидалось число >= 0, получено: {constant!r}"
+        assert constant > 0, f"Ожидалось число > 0, получено: {constant!r}"
