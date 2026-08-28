@@ -28,6 +28,7 @@ class PolymarketClient:
     def fetch_markets(self, limit: int = 50) -> List[Dict]:
         logger.debug("Fetching markets (limit=%d) from %s", limit, self.BASE)
         attempts = 3
+        response = None
         for attempt in range(1, attempts + 1):
             try:
                 # Clamp limit to the range 1..500
@@ -45,7 +46,7 @@ class PolymarketClient:
                     return []
                 return data
             except requests.RequestException as e:
-                if response.status_code in (429, 500, 502, 503, 504):
+                if response is not None and getattr(response, 'status_code', None) in (429, 500, 502, 503, 504):
                     logger.warning(f"HTTP error while fetching markets (attempt {attempt}): {e}")
                     time.sleep(0.5 * attempt)
                 else:
@@ -58,6 +59,7 @@ class PolymarketClient:
     def fetch_market_details(self, market_id: str) -> Optional[Dict]:
         logger.debug("Fetching market details for %s", market_id)
         attempts = 3
+        response = None
         for attempt in range(1, attempts + 1):
             try:
                 response = self.session.get(
@@ -72,7 +74,7 @@ class PolymarketClient:
                     return None
                 return data
             except requests.RequestException as e:
-                if response.status_code in (429, 500, 502, 503, 504):
+                if response is not None and getattr(response, 'status_code', None) in (429, 500, 502, 503, 504):
                     logger.warning(f"HTTP error while fetching market details (attempt {attempt}): {e}")
                     time.sleep(0.5 * attempt)
                 else:
@@ -85,6 +87,7 @@ class PolymarketClient:
     def fetch_prices(self) -> Dict[str, float]:
         logger.debug("Fetching prices from %s", self.BASE)
         attempts = 3
+        response = None
         for attempt in range(1, attempts + 1):
             try:
                 response = self.session.get(
@@ -99,7 +102,7 @@ class PolymarketClient:
                     return {}
                 return data
             except requests.RequestException as e:
-                if response.status_code in (429, 500, 502, 503, 504):
+                if response is not None and getattr(response, 'status_code', None) in (429, 500, 502, 503, 504):
                     logger.warning(f"HTTP error while fetching prices (attempt {attempt}): {e}")
                     time.sleep(0.5 * attempt)
                 else:
@@ -112,6 +115,7 @@ class PolymarketClient:
     def fetch_spreads(self) -> Dict[str, float]:
         logger.debug("Fetching spreads from %s", self.BASE)
         attempts = 3
+        response = None
         for attempt in range(1, attempts + 1):
             try:
                 response = self.session.get(
@@ -126,7 +130,7 @@ class PolymarketClient:
                     return {}
                 return data
             except requests.RequestException as e:
-                if response.status_code in (429, 500, 502, 503, 504):
+                if response is not None and getattr(response, 'status_code', None) in (429, 500, 502, 503, 504):
                     logger.warning(f"HTTP error while fetching spreads (attempt {attempt}): {e}")
                     time.sleep(0.5 * attempt)
                 else:
@@ -139,6 +143,7 @@ class PolymarketClient:
     def fetch_volumes(self) -> Dict[str, float]:
         logger.debug("Fetching volumes from %s", self.BASE)
         attempts = 3
+        response = None
         for attempt in range(1, attempts + 1):
             try:
                 response = self.session.get(
@@ -153,7 +158,7 @@ class PolymarketClient:
                     return {}
                 return data
             except requests.RequestException as e:
-                if response.status_code in (429, 500, 502, 503, 504):
+                if response is not None and getattr(response, 'status_code', None) in (429, 500, 502, 503, 504):
                     logger.warning(f"HTTP error while fetching volumes (attempt {attempt}): {e}")
                     time.sleep(0.5 * attempt)
                 else:

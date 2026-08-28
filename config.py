@@ -120,7 +120,7 @@ MIN_LIQUIDITY_USD = settings.liquidity_gate.min_liquidity_usd
 MAX_SPREAD_PCT = settings.spread.max_spread_pct
 MIN_VOLUME_24H = settings.liquidity_gate.min_volume_24h
 SCAN_LIMIT = settings.connection.scan_limit
-APP_VERSION = settings.get("APP_VERSION", "0.1.0")
+APP_VERSION = getattr(settings, 'APP_VERSION', '0.1.0')
 
 config = settings
 
