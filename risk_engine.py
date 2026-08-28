@@ -10,6 +10,21 @@ from core.models import Market
 Включает в себя функции для расчета ожидаемого значения (EV), фракционного Келли, размера позиции и доверительных интервалов.
 """
 
+__all__ = [
+    "OutcomeAssessment",
+    "passes_liquidity_gate",
+    "passes_spread_gate",
+    "calculate_expected_value",
+    "calculate_fractional_kelly",
+    "determine_position_size",
+    "_z_score",
+    "_erf_inv",
+    "estimate_outcome_probability",
+    "calculate_confidence_interval",
+    "assess_outcome",
+    "max_position_usd",
+]
+
 @dataclass
 class OutcomeAssessment:
     outcome: str
@@ -27,11 +42,11 @@ class OutcomeAssessment:
             "interval_upper": self.interval_upper,
         }
 
-def passes_liquidity_gate(market: Market, min_liquidity: float) -> bool:
-    return market.liquidity > min_liquidity
+def passes_liquidity_gate(market: Market, min_liquidity: Optional[float] = None) -> bool:
+    return market.liquidity > (min_liquidity if min_liquidity is not None else 0)
 
-def passes_spread_gate(market: Market, max_spread: float) -> bool:
-    return market.spread < max_spread
+def passes_spread_gate(market: Market, max_spread: Optional[float] = None) -> bool:
+    return market.spread < (max_spread if max_spread is not None else float('inf'))
 
 def calculate_expected_value(market: Market, outcome_probabilities: Dict[str, float]) -> float:
     """
