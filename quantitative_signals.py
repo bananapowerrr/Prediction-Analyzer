@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from core.models import QuantitativeSignal
 import logging
 
@@ -37,7 +37,7 @@ def generate_quantitative_signals(market_data: Dict[str, Any]) -> List[Quantitat
     
     return signals
 
-def build_signal(market_id: str, score: float, indicators: dict | None = None) -> QuantitativeSignal:
+def build_signal(market_id: str, score: float, indicators: Optional[dict] = None) -> QuantitativeSignal:
     """
     Создает сигнал на основе оценки и индикаторов.
     
