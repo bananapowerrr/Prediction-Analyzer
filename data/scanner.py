@@ -68,8 +68,8 @@ def run_scan(min_liquidity: Optional[float] = None, max_spread: Optional[float] 
     markets = scanner.scan()
     if not markets:
         logger.warning("No markets found after filtering.")
-    if limit is not None:
-        markets = markets[:limit]
     if sort_by_liquidity:
         markets = sorted(markets, key=lambda m: m.liquidity, reverse=True)
+    if limit is not None:
+        markets = markets[:limit]
     return markets
