@@ -19,7 +19,7 @@ class StateManager:
 
     def __init__(self, db_path: str):
         """
-        Кэш недавних market id и опционально события.
+        Инициализирует менеджер состояния с базой данных.
 
         :param db_path: Путь к базе данных
         """
@@ -55,7 +55,7 @@ class StateManager:
             ''', (event_type, str(data)))
             self.conn.commit()
         except Exception as e:
-            logger.error(f"Error saving event: {e}")
+            logger.error(f"Ошибка при сохранении события: {e}")
 
     def get_events(self, event_type: str = None) -> List[Dict]:
         """
@@ -74,7 +74,7 @@ class StateManager:
             columns = [col[0] for col in self.cursor.description]
             return [dict(zip(columns, row)) for row in self.cursor.fetchall()]
         except Exception as e:
-            logger.error(f"Error fetching events: {e}")
+            logger.error(f"Ошибка при получении событий: {e}")
             return []
 
     def remember_markets(self, ids: List[str]):
@@ -129,7 +129,7 @@ class StateManager:
             }
             return json.dumps(data, indent=4)
         except (TypeError, OverflowError, json.JSONDecodeError) as e:
-            logger.error(f"Error exporting JSON: {e}")
+            logger.error(f"Ошибка при экспорте JSON: {e}")
             return {}
 
     @staticmethod
@@ -143,5 +143,5 @@ class StateManager:
         try:
             return json.loads(json_data)
         except (json.JSONDecodeError, TypeError) as e:
-            logger.error(f"Error loading JSON: {e}")
+            logger.error(f"Ошибка при загрузке JSON: {e}")
             return {}
