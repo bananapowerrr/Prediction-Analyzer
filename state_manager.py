@@ -1,5 +1,6 @@
 import sqlite3
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Any
+import json
 
 MAX_RECENT = 500
 
@@ -104,10 +105,30 @@ class StateManager:
         """
         return list(self.recent_markets)
 
-def get_default_state() -> StateManager:
-    """
-    Возвращает экземпляр StateManager с базой данных по умолчанию.
+    def export_json(self) -> Any:
+        """
+        Экспортирует данные в JSON формате.
 
-    :return: Экземпляр StateManager
-    """
-    return StateManager(db_path="default_state.db")
+        :return: Данные в JSON формате или пустое значение при ошибке
+        """
+        try:
+            data = {
+                "recent_markets": list(self.recent_markets),
+                "events": self.get_events()
+            }
+            return json.dumps(data, indent=4)
+        except (TypeError, OverflowError, json.JSONDecodeError):
+            return {}
+
+    @staticmethod
+    def load_json(json_data: str) -> Any:
+        """
+        Загружает данные из JSON формата.
+
+        :param json_data: Данные в JSON формате
+        :return: Данные или пустое значение при ошибке
+        """
+        try:
+            return json.loads(json_data)
+        except (json.JSONDecodeError, TypeError):
+            return {}
