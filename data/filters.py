@@ -1,3 +1,8 @@
+"""
+Файл фильтрует рынки Polymarket по ликвидности, спреду и объёму.
+passes_all_gates объединяет три гейта.
+"""
+
 from core.models import Market
 
 def passes_liquidity_gate(market: Market, min_liquidity: float) -> bool:
