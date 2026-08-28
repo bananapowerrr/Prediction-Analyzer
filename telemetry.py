@@ -1,17 +1,4 @@
-"""Метрики и логирование сканера.
-
-Provides:
-  * ``Telemetry`` class that captures unhandled exceptions and system state
-    and writes detailed, self-contained JSON reports to a configurable
-    working directory.
-  * ``install_exception_hook`` / ``setup`` helpers to wire the telemetry
-    into the host application's ``sys.excepthook`` (and threading hook).
-
-The module only depends on the Python standard library. Optional richer
-system metrics (CPU/Memory/Disk usage) are collected when ``psutil`` is
-installed; otherwise those fields are gracefully omitted.
-"""
-
+"""Телеметрия и логирование сканера."""
 from __future__ import annotations
 
 import datetime as _dt
@@ -37,11 +24,11 @@ logger = logging.getLogger("telemetry")
 
 
 class TelemetryError(Exception):
-    """Raised for unrecoverable errors inside the telemetry subsystem."""
+    """Ошибка в подсистеме мониторинга."""
 
 
 class Telemetry:
-    """Collects diagnostic data and persists it to disk on failures."""
+    """Сбор и сохранение телеметрии в JSON."""
 
     def __init__(self, log_dir: str = "telemetry_logs", app_name: str = "desktop-tutorial") -> None:
         self.app_name = app_name
@@ -53,7 +40,7 @@ class Telemetry:
         self._scan_stats: Optional[Dict[str, Any]] = None
 
     # ------------------------------------------------------------------ #
-    # Filesystem helpers
+    # Файловые операции
     # ------------------------------------------------------------------ #
     def _ensure_dir(self) -> None:
         with self._lock:
@@ -62,7 +49,7 @@ class Telemetry:
                     os.makedirs(self.log_dir, exist_ok=True)
                 except OSError as exc:
                     raise TelemetryError(
-                        f"Cannot create telemetry directory {self.log_dir!r}: {exc}"
+                        f"Не удалось создать каталог для мониторинга {self.log_dir!r}: {exc}"
                     ) from exc
                 self._ensured = True
 
@@ -71,14 +58,10 @@ class Telemetry:
         return _dt.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
 
     # ------------------------------------------------------------------ #
-    # System state
+    # Состояние системы
     # ------------------------------------------------------------------ #
     def get_system_state(self) -> Dict[str, Any]:
-        """Return a snapshot of the system / process state.
-
-        Sensitive values (environment variable contents) are intentionally
-        NOT captured to avoid leaking secrets such as private keys.
-        """
+        """Возвращает снимок состояния системы / процесса."""
         state: Dict[str, Any] = {
             "app_name": self.app_name,
             "timestamp": _dt.datetime.now().isoformat(timespec="seconds"),
@@ -129,7 +112,7 @@ class Telemetry:
                     "memory_info": _as_dict(psutil.Process().memory_info()),
                     "num_threads": psutil.Process().num_threads(),
                 }
-            except Exception as exc:  # pragma: no cover - defensive
+            except Exception as exc:  # pragma: no cover - защита
                 state["system_metrics_error"] = repr(exc)
 
         return state
@@ -154,10 +137,10 @@ class Telemetry:
             return None
 
     # ------------------------------------------------------------------ #
-    # Dumping
+    # Запись данных
     # ------------------------------------------------------------------ #
     def dump_state(self, reason: str = "manual") -> str:
-        """Write a system-state snapshot to ``<log_dir>/state_*.json``."""
+        """Записывает снимок состояния системы в файл JSON в конфигурируемый каталог."""
         self._ensure_dir()
         state_file = os.path.join(self.log_dir, f"state_{self._timestamp()}.json")
         payload = {
@@ -166,7 +149,7 @@ class Telemetry:
             "system_state": self.get_system_state(),
         }
         self._write_json(state_file, payload)
-        logger.info("State dumped to %s", state_file)
+        logger.info("Состояние записано в %s", state_file)
         return state_file
 
     def log_exception(
@@ -176,7 +159,7 @@ class Telemetry:
         exc_traceback: Optional[TracebackType],
         context: Optional[Dict[str, Any]] = None,
     ) -> str:
-        """Persist a detailed diagnostic report for an exception."""
+        """Записывает подробный отчет об исключении."""
         self._ensure_dir()
         ts = self._timestamp()
         error_file = os.path.join(self.log_dir, f"error_{ts}.json")
@@ -208,12 +191,12 @@ class Telemetry:
         self._write_json(error_file, report)
 
         logger.error(
-            "Unhandled exception logged to %s\n%s", error_file, tb_text.strip()
+            "Необработанное исключение записано в %s\n%s", error_file, tb_text.strip()
         )
         return error_file
 
     # ------------------------------------------------------------------ #
-    # Output writers
+    # Писатели вывода
     # ------------------------------------------------------------------ #
     @staticmethod
     def _write_json(path: str, payload: Dict[str, Any]) -> None:
@@ -221,7 +204,7 @@ class Telemetry:
             with open(path, "w", encoding="utf-8") as fh:
                 json.dump(payload, fh, indent=4, default=_json_default, ensure_ascii=False)
         except TypeError:
-            # Fallback: strip non-serialisable data.
+            # Фallback: удаление непередаваемых данных.
             with open(path, "w", encoding="utf-8") as fh:
                 json.dump(payload, fh, indent=4, default=str, ensure_ascii=False)
 
@@ -243,49 +226,49 @@ def _json_default(obj: Any) -> Any:
 
 
 # ---------------------------------------------------------------------- #
-# Hook installation
+# Установка хуков
 # ---------------------------------------------------------------------- #
     def inc(self, name: str) -> None:
-        """Increment the counter for the given name."""
+        """Увеличивает счётчик для заданного имени."""
         with self._lock:
             if name not in self._counters:
                 self._counters[name] = 0
             self._counters[name] += 1
 
     def get(self, name: str) -> int:
-        """Get the current value of the counter for the given name."""
+        """Возвращает текущее значение счётчика для заданного имени."""
         with self._lock:
             return self._counters.get(name, 0)
 
     def reset_all(self) -> None:
-        """Reset all counters."""
+        """Сбрасывает все счётчики."""
         with self._lock:
             self._counters.clear()
 
     def record_scan(self, total: int, passed: int) -> None:
-        """Record the results of a scan."""
+        """Записывает результаты сканирования."""
         with self._lock:
             if name not in self._counters:
                 self._counters[name] = 0
             self._counters[name] += 1
 
     def dump_counters(self) -> Dict[str, int]:
-        """Return a copy of all counters."""
+        """Возвращает копию всех счётчиков."""
         with self._lock:
             return self._counters.copy()
 
     def get_counters(self) -> Dict[str, int]:
-        """Get the current values of all counters."""
+        """Возвращает текущие значения всех счётчиков."""
         with self._lock:
             return self._counters.copy()
 
     def last_scan_stats(self) -> Optional[Dict[str, Any]]:
-        """Get the statistics of the last scan."""
+        """Возвращает статистику последнего сканирования."""
         with self._lock:
             return self._scan_stats
 
     def dump_json(self, path: str) -> None:
-        """Write the current state and counters to a JSON file."""
+        """Записывает текущее состояние и счётчики в JSON файл."""
         self._ensure_dir()
         payload = {
             "type": "telemetry_dump",
@@ -296,4 +279,4 @@ def _json_default(obj: Any) -> Any:
             "scan_stats": self.last_scan_stats(),
         }
         self._write_json(path, payload)
-        logger.info("Telemetry data dumped to %s", path)
+        logger.info("Данные мониторинга записаны в %s", path)
