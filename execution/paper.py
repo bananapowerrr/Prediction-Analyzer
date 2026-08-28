@@ -5,10 +5,18 @@ class PaperBroker:
         self.positions = {}
 
     @property
-    def balance(self):
+    def balance(self) -> float:
         return self._balance
 
     def place_order(self, market_id: str, side: str, size: float, price: float) -> dict:
+        """Создает и выполняет заказ.
+
+        :param market_id: ID рынка
+        :param side: Сторона сделки ('buy' или 'sell')
+        :param size: Размер сделки
+        :param price: Цена сделки
+        :return: Словарь с результатом выполнения заказа
+        """
         if side not in ['buy', 'sell']:
             raise ValueError("Недопустимое значение для side. Допустимые значения: 'buy' или 'sell'")
         cost = size * price
@@ -28,6 +36,13 @@ class PaperBroker:
         return {'id': order_id, 'status': 'filled', 'pnl': 0}
 
     def _update_position(self, market_id: str, side: str, size: float, price: float):
+        """Обновляет позиции после выполнения сделки.
+
+        :param market_id: ID рынка
+        :param side: Сторона сделки ('buy' или 'sell')
+        :param size: Размер сделки
+        :param price: Цена сделки
+        """
         if market_id not in self.positions:
             self.positions[market_id] = {'size': 0, 'avg_price': 0, 'pnl': 0}
         pos = self.positions[market_id]
@@ -43,14 +58,27 @@ class PaperBroker:
             pos['avg_price'] = 0
 
     def get_positions(self) -> list:
+        """Возвращает список открытых позиций.
+
+        :return: Список позиций
+        """
         return [{'market_id': m, **p} for m, p in self.positions.items() if p['size'] != 0]
 
     def reset(self, balance: float = 10000.0):
+        """Сбрасывает состояние брокера.
+
+        :param balance: Начальный баланс
+        """
         self._balance = balance
         self.orders = {}
         self.positions = {}
 
     def cancel(self, order_id: str) -> bool:
+        """Отменяет заказ.
+
+        :param order_id: ID заказа
+        :return: True если заказ отменен, False если заказ не найден
+        """
         if order_id in self.orders:
             order = self.orders[order_id]
             if order['status'] == 'filled':
@@ -63,6 +91,10 @@ class PaperBroker:
         return False
 
     def snapshot(self) -> dict:
+        """Создает снимок состояния брокера.
+
+        :return: Словарь с состоянием брокера
+        """
         return {
             'balance': self._balance,
             'positions': self.get_positions(),
