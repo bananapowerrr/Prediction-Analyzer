@@ -166,6 +166,8 @@ class HybridPipeline:
         self.local_tier = LocalTier()
 
     async def process_market(self, market_data: Dict[str, Any]) -> PipelineResult:
+        if not market_data:
+            return PipelineResult(market={}, verdicts=JudgeVerdict(decision="hold", confidence=0.0, reasoning="No data", action="hold"))
         validated = validate_market_data(market_data)
         market_dict = {
             "id": validated.id,
