@@ -1,5 +1,5 @@
 import sqlite3
-from typing import Dict, List
+from typing import Dict, List, Optional
 import os
 import json
 import logging
@@ -27,10 +27,10 @@ class PersistenceManager:
         self.conn.commit()
 
     def save_event(self, event_type: str, data: Dict):
-        self.cursor.execute('INSERT INTO reports (report_type, data) VALUES (?, ?)', (event_type, str(data)))
+        self.cursor.execute('INSERT INTO reports (report_type, data) VALUES (?, ?)', (event_type, json.dumps(data)))
         self.conn.commit()
 
-    def get_events(self, event_type: str = None) -> List[Dict]:
+    def get_events(self, event_type: Optional[str] = None) -> List[Dict]:
         query = 'SELECT data FROM reports'
         if event_type:
             query += f' WHERE report_type = ?'
@@ -38,32 +38,32 @@ class PersistenceManager:
         else:
             self.cursor.execute(query)
         results = self.cursor.fetchall()
-        return [dict(row) for row in results]
+        return [json.loads(dict(row)['data']) for row in results]
 
     def save_report(self, report_type: str, data: Dict):
-        self.cursor.execute('INSERT INTO reports (report_type, data) VALUES (?, ?)', (report_type, str(data)))
+        self.cursor.execute('INSERT INTO reports (report_type, data) VALUES (?, ?)', (report_type, json.dumps(data)))
         self.conn.commit()
 
-    def get_report(self, report_type: str) -> Dict:
+    def get_report(self, report_type: str) -> Optional[Dict]:
         self.cursor.execute('SELECT data FROM reports WHERE report_type = ?', (report_type,))
         result = self.cursor.fetchone()
         if result:
-            return dict(result)
+            return json.loads(result[0])
         return None
 
     def get_all_reports(self) -> List[Dict]:
-        self.cursor.execute('SELECT * FROM reports')
+        self.cursor.execute('SELECT data FROM reports')
         results = self.cursor.fetchall()
-        return [dict(row) for row in results]
+        return [json.loads(dict(row)['data']) for row in results]
 
-    def save_markets_json(self, markets: list, path: str):
+    def save_markets_json(self, markets: List[Dict], path: str):
         os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
         data = [_to_dict(m) for m in markets]
         with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as tmp:
             json.dump(data, tmp, ensure_ascii=False, indent=4)
         os.replace(tmp.name, path)
 
-    def load_markets_json(self, path: str) -> list:
+    def load_markets_json(self, path: str) -> List[Dict]:
         try:
             with open(path, 'r', encoding='utf-8') as f:
                 return json.load(f)
@@ -92,31 +92,16 @@ def _to_dict(obj):
         return obj
     return getattr(obj, '__dict__', obj)
 
-def save_markets_json(markets: list, path: str):
+def save_markets_json(markets: List[Dict], path: str):
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     data = [_to_dict(m) for m in markets]
     with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as tmp:
         json.dump(data, tmp, ensure_ascii=False, indent=4)
     os.replace(tmp.name, path)
 
-def load_markets_json(path: str) -> list:
+def load_markets_json(path: str) -> List[Dict]:
     try:
         with open(path, 'r', encoding='utf-8') as f:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         return []
-
-def save_markets_csv(path: str, markets: List[Dict]):
-    """Сохранить список dict (id, question, liquidity, spread, volume_24h) в CSV UTF-8 с заголовком id,question,liquidity,spread,volume_24h."""
-    if not markets:
-        return
-    try:
-        normalized_markets = [{k: v for k, v in market.items() if k in ['id', 'question', 'liquidity', 'spread', 'volume_24h']} for market in markets]
-        with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as temp_file:
-            writer = csv.DictWriter(temp_file, fieldnames=['id', 'question', 'liquidity', 'spread', 'volume_24h'])
-            writer.writeheader()
-            writer.writerows(normalized_markets)
-            temp_path = temp_file.name
-        os.replace(temp_path, path)
-    except IOError as e:
-        logger.error(f"Ошибка при сохранении файла {path}: {e}")
