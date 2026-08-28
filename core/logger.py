@@ -41,6 +41,12 @@ def _level_from(value: Union[int, str]) -> int:
     return level
 
 
+def _setup_handler(handler: logging.Handler, level: int, fmt: logging.Formatter) -> None:
+    handler.setLevel(level)
+    handler.setFormatter(fmt)
+    logging.getLogger().addHandler(handler)
+
+
 def setup_logging(
     level: Union[int, str] = logging.INFO,
     log_dir: str = DEFAULT_LOG_DIR,
@@ -72,6 +78,9 @@ def setup_logging(
     """
     global _CONFIGURED
 
+    if _CONFIGURED:
+        return
+
     root = logging.getLogger()
     root.setLevel(_level_from(level))
 
@@ -81,9 +90,7 @@ def setup_logging(
     file_fmt = _build_formatter(file_format)
 
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(_level_from(console_level if console_level is not None else level))
-    console_handler.setFormatter(console_fmt)
-    root.addHandler(console_handler)
+    _setup_handler(console_handler, _level_from(console_level if console_level is not None else level), console_fmt)
 
     try:
         os.makedirs(log_dir, exist_ok=True)
@@ -94,9 +101,7 @@ def setup_logging(
             backupCount=backup_count,
             encoding="utf-8",
         )
-        file_handler.setLevel(_level_from(file_level if file_level is not None else level))
-        file_handler.setFormatter(file_fmt)
-        root.addHandler(file_handler)
+        _setup_handler(file_handler, _level_from(file_level if file_level is not None else level), file_fmt)
     except OSError as exc:
         root.warning("Не удалось прикрепить обработчик файла (%s); продолжаем только с консолью", exc)
 
