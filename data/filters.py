@@ -1,6 +1,7 @@
 """
 Файл фильтрует рынки Polymarket по ликвидности, спреду и объёму.
 passes_all_gates объединяет три гейта.
+filter_markets фильтрует рынки, проходящие все три гейта.
 """
 
 from __future__ import annotations
@@ -31,6 +32,15 @@ def gate_reject_reasons(market: Market, min_liquidity: float, max_spread: float,
     return reasons
 
 def filter_markets(markets: list[Market], min_liquidity: float, max_spread: float, min_volume: float) -> list[Market]:
+    """
+    Фильтрует рынки, проходящие все три гейта.
+
+    :param markets: Список рынков для фильтрации.
+    :param min_liquidity: Минимальная ликвидность для прохождения гейта ликвидности.
+    :param max_spread: Максимальный спред для прохождения гейта спреда.
+    :param min_volume: Минимальный объем за 24 часа для прохождения гейта объема.
+    :return: Список фильтрованных рынков.
+    """
     return [market for market in markets if passes_all_gates(market, min_liquidity, max_spread, min_volume)]
 
 def passes_soft_gates(market: Market, min_liquidity: float, max_spread: float, min_volume: float) -> bool:
