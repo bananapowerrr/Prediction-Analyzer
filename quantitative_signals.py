@@ -38,6 +38,8 @@ def build_signal(market_id: str, score: float, indicators: dict | None = None) -
     :param indicators: Индикаторы
     :return: Сигнал
     """
+    score = max(0.0, min(1.0, score))  # Clamp score to [0, 1]
+    
     if score > 0.6:
         action = "buy"
     elif score < 0.4:

@@ -100,6 +100,15 @@ def assess_outcome(
     sample_size: int,
     confidence_level: float = 0.95,
 ) -> OutcomeAssessment:
+    """
+    Оценивает вероятность исхода и доверительный интервал для заданного рынка и вероятностей исходов.
+
+    :param outcome_probabilities: Словарь с вероятностями исходов.
+    :param outcome: Ожидаемый исход.
+    :param sample_size: Размер выборки.
+    :param confidence_level: Уровень доверия (по умолчанию 0.95).
+    :return: Оценка исхода с вероятностью, уровнем доверия и доверительным интервалом.
+    """
     probability = estimate_outcome_probability(outcome_probabilities, outcome)
     lower, upper = calculate_confidence_interval(probability, sample_size, confidence_level)
     return OutcomeAssessment(
