@@ -1,7 +1,6 @@
-"""Конфигурация централизованного логирования приложения.
+"""Конфигурация логирования.
 
-Настройка корневого логгера с обработчиками консоли и вращающегося файла.
-Модули получают логгеры через ``logging.getLogger(__name__)``.
+Настройка корневого логгера с обработчиками консоли и файла.
 """
 
 from __future__ import annotations
@@ -27,6 +26,12 @@ def _build_formatter(fmt: str, datefmt: Optional[str] = None) -> logging.Formatt
     return logging.Formatter(fmt, datefmt=datefmt or DATE_FORMAT)
 
 
+def _clear_handlers(logger: logging.Logger) -> None:
+    for handler in list(logger.handlers):
+        logger.removeHandler(handler)
+        handler.close()
+
+
 def _level_from(value: Union[int, str]) -> int:
     if isinstance(value, int):
         return value
@@ -48,34 +53,29 @@ def setup_logging(
     file_format: str = FILE_FORMAT,
     propagate_root: bool = True,
 ) -> logging.Logger:
-    """Настройка корневого логгера с обработчиками консоли и вращающегося файла.
-
-    Вызов этой функции более одного раза безопасен: она перестраивает набор обработчиков,
-    чтобы можно было обновить конфигурацию (например, со значениями из настроек приложения).
+    """Настройка логгера.
 
     Args:
-        level: Основной уровень логирования для корневого логгера.
-        log_dir: Директория, где записывается вращающийся файл логов.
-        log_file: Имя вращающегося файла логов.
-        max_bytes: Максимальный размер одного файла логов перед вращением.
-        backup_count: Количество резервных файлов логов для сохранения.
-        console_level: Переопределенный уровень для обработчика консоли.
-        file_level: Переопределенный уровень для обработчика файла.
-        console_format: Формат строки для обработчика консоли.
-        file_format: Формат строки для обработчика файла.
+        level: Основной уровень логирования.
+        log_dir: Директория для файла логов.
+        log_file: Имя файла логов.
+        max_bytes: Максимальный размер файла логов.
+        backup_count: Количество резервных файлов.
+        console_level: Уровень для консольного обработчика.
+        file_level: Уровень для файлового обработчика.
+        console_format: Формат строки для консольного обработчика.
+        file_format: Формат строки для файлового обработчика.
         propagate_root: Позволяет ли дочерним логгерам передавать сообщения корневому логгеру.
 
     Returns:
-        Настроенный корневой логгер.
+        Настроенный логгер.
     """
     global _CONFIGURED
 
     root = logging.getLogger()
     root.setLevel(_level_from(level))
 
-    for handler in list(root.handlers):
-        root.removeHandler(handler)
-        handler.close()
+    _clear_handlers(root)
 
     console_fmt = _build_formatter(console_format)
     file_fmt = _build_formatter(file_format)
@@ -98,7 +98,7 @@ def setup_logging(
         file_handler.setFormatter(file_fmt)
         root.addHandler(file_handler)
     except OSError as exc:
-        root.warning("Не удалось прикрепить обработчик вращающегося файла (%s); продолжаем только с консолью", exc)
+        root.warning("Не удалось прикрепить обработчик файла (%s); продолжаем только с консолью", exc)
 
     root.propagate = propagate_root
     _CONFIGURED = True
@@ -106,17 +106,18 @@ def setup_logging(
 
 
 def get_logger(name: Optional[str] = None) -> logging.Logger:
-    """Возвращает логгер, настраивая централизованное логирование при первом использовании."""
+    """Возвращает логгер."""
     if not _CONFIGURED:
         setup_logging()
     return logging.getLogger(name)
 
 
 def reset() -> None:
-    """Удаляет все обработчики и сбрасывает флаг настроек (для тестов)."""
+    """Сбрасывает настройки логгера (для тестов)."""
     global _CONFIGURED
     root = logging.getLogger()
-    for handler in list(root.handlers):
-        root.removeHandler(handler)
-        handler.close()
+    _clear_handlers(root)
     _CONFIGURED = False
+
+
+__all__ = ["setup_logging", "get_logger", "reset"]
