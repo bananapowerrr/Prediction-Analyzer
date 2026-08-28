@@ -39,9 +39,9 @@ class MarketScanner:
                 schema = MarketSchema(**record)
                 markets.append(schema.to_market())
             except ValidationError as e:
-                logger.warning("Skipping invalid market record #%d: %s", i, e.errors()[0]["msg"])
+                logger.warning("Пропускаю некорректную запись рынка #%d: %s", i, e.errors()[0]["msg"])
             except Exception as e:
-                logger.warning("Skipping malformed market record #%d: %s", i, e)
+                logger.warning("Пропускаю некорректную запись рынка #%d: %s", i, e)
         return markets
     
     def filter_markets(self, markets: List[Market]) -> List[Market]:
@@ -57,16 +57,16 @@ class MarketScanner:
     def scan(self) -> List[Market]:
         raw = self.fetch_raw()
         markets = self.parse(raw)
-        logger.info("Parsed %d markets; applying liquidity/spread/volume gates", len(markets))
+        logger.info("Парсинг %d рынков; применение гейтов ликвидности/разброса/объема", len(markets))
         filtered = self.filter_markets(markets)
-        logger.info("Passed gates: %d/%d", len(filtered), len(markets))
+        logger.info("Прошло гейты: %d/%d", len(filtered), len(markets))
         return filtered
 
 def run_scan(min_liquidity: Optional[float] = None, max_spread: Optional[float] = None, min_volume: Optional[float] = None, limit: Optional[int] = None, sort_by_liquidity: bool = True) -> List[Market]:
     scanner = MarketScanner(ScanConfig(min_liquidity=min_liquidity, max_spread=max_spread, min_volume=min_volume))
     markets = scanner.scan()
     if not markets:
-        logger.warning("No markets found after filtering.")
+        logger.warning("Нет рынков после фильтрации.")
     if sort_by_liquidity:
         markets = sorted(markets, key=lambda m: m.liquidity, reverse=True)
     if limit is not None:
@@ -77,6 +77,6 @@ def run_scan(min_liquidity: Optional[float] = None, max_spread: Optional[float] 
         passed = len([m for m in markets if passes_all_gates(m, min_liquidity, max_spread, min_volume)])
         telemetry.record_scan(total, passed)
     except ImportError:
-        logger.debug("telemetry module not available, skipping record_scan")
+        logger.debug("Модуль telemetry не доступен, пропускаю record_scan")
     
     return markets
