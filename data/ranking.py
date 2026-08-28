@@ -2,21 +2,17 @@ from typing import List, Optional
 from core.models import Market
 
 
-def rank_markets(markets: List[Market], limit: Optional[int] = None) -> List[Market]:
-    """
-    Сортирует рынки по score (если есть атрибут) или liquidity в порядке убывания.
+def calculate_score(market: Market) -> float:
+    return market.liquidity * 0.5 + market.volume_24h * 0.3 - market.spread * 1000 * 0.2
 
-    :param markets: Список рынков для сортировки.
-    :param limit: Опциональный параметр для ограничения количества возвращаемых рынков.
-    :return: Отсортированный список рынков.
-    """
-    has_score = all(hasattr(m, "score") for m in markets) and all(
-        m.score is not None for m in markets if hasattr(m, "score")
-    )
 
-    if has_score:
-        sorted_markets = sorted(markets, key=lambda m: m.score, reverse=True)
-    else:
-        sorted_markets = sorted(markets, key=lambda m: m.liquidity, reverse=True)
+def rank_markets(markets: Optional[List[Market]] = None) -> List[Market]:
+    if markets is None:
+        return []
 
-    return sorted_markets[:limit] if limit is not None else sorted_markets
+    for m in markets:
+        setattr(m, "score", calculate_score(m))
+
+    sorted_markets = sorted(markets, key=lambda m: m.score, reverse=True)
+
+    return sorted_markets
