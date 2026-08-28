@@ -6,6 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class RpcSettings(BaseSettings):
+    """Настройки для RPC-серверов."""
     model_config = SettingsConfigDict(env_prefix="RPC_")
 
     endpoint: str = "https://polygon-rpc.com"
@@ -31,6 +32,7 @@ class RpcSettings(BaseSettings):
 
 
 class BaseRpcSettings(BaseSettings):
+    """Настройки для основного RPC-сервера."""
     model_config = SettingsConfigDict(env_prefix="BASE_RPC_")
 
     endpoint: str = "https://mainnet.base.org"
@@ -56,6 +58,7 @@ class BaseRpcSettings(BaseSettings):
 
 
 class LiquidityGateSettings(BaseSettings):
+    """Настройки для ликвидности-гейта."""
     model_config = SettingsConfigDict(env_prefix="LIQUIDITY_")
 
     min_liquidity_usd: float = 1000.0  # Минимальная ликвидность в USD для рынка
@@ -63,12 +66,14 @@ class LiquidityGateSettings(BaseSettings):
 
 
 class SpreadSettings(BaseSettings):
+    """Настройки для гейта разброса."""
     model_config = SettingsConfigDict(env_prefix="SPREAD_")
 
     max_spread_pct: float = 0.1  # Максимальный разброс в процентах для рынка
 
 
 class ConnectionSettings(BaseSettings):
+    """Настройки для подключения."""
     model_config = SettingsConfigDict(env_prefix="CONN_")
 
     gamma_api_base: str = "https://gamma-api.polymarket.com"
@@ -77,6 +82,7 @@ class ConnectionSettings(BaseSettings):
 
 
 class CloudTierSettings(BaseSettings):
+    """Настройки для облакового уровня."""
     model_config = SettingsConfigDict(env_prefix="CLOUD_")
 
     groq_api_key: str = ""
@@ -90,6 +96,7 @@ class CloudTierSettings(BaseSettings):
 
 
 class LocalTierSettings(BaseSettings):
+    """Настройки для локального уровня."""
     model_config = SettingsConfigDict(env_prefix="LOCAL_")
 
     ollama_base_url: str = "http://localhost:11434"
@@ -99,6 +106,7 @@ class LocalTierSettings(BaseSettings):
 
 
 class Settings(BaseSettings):
+    """Основные настройки Prediction Analyzer."""
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
