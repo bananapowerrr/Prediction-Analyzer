@@ -58,8 +58,9 @@ class PersistenceManager:
     def save_markets_json(self, path: str, markets: List[Dict]):
         """Сохранить список dict (id, question, liquidity, spread, volume_24h) в JSON UTF-8."""
         try:
+            normalized_markets = [{k: v for k, v in market.items() if k in ['id', 'question', 'liquidity', 'spread', 'volume_24h']} for market in markets]
             with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as temp_file:
-                json.dump(markets, temp_file, ensure_ascii=False, indent=4)
+                json.dump(normalized_markets, temp_file, ensure_ascii=False, indent=4)
                 temp_path = temp_file.name
             os.replace(temp_path, path)
         except IOError as e:
@@ -79,8 +80,9 @@ class PersistenceManager:
 def save_markets_json(path: str, markets: List[Dict]):
     """Сохранить список dict (id, question, liquidity, spread, volume_24h) в JSON UTF-8."""
     try:
+        normalized_markets = [{k: v for k, v in market.items() if k in ['id', 'question', 'liquidity', 'spread', 'volume_24h']} for market in markets]
         with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as temp_file:
-            json.dump(markets, temp_file, ensure_ascii=False, indent=4)
+            json.dump(normalized_markets, temp_file, ensure_ascii=False, indent=4)
             temp_path = temp_file.name
         os.replace(temp_path, path)
     except IOError as e:
