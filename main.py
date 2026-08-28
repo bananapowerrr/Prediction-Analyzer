@@ -32,16 +32,16 @@ def main() -> None:
             }
             print(json.dumps(status, indent=4))
         else:
-            print("Prediction Analyzer ready")
+            print("Prediction Analyzer готов")
         return
 
     try:
         markets = run_scan(min_liquidity=args.min_liquidity, max_spread=args.max_spread, min_volume=args.min_volume, limit=args.limit)
     except Exception as e:
-        logging.error(f"Ошибка во время сканирования: {e}")
+        logging.error(f"Ошибка сканирования: {e}")
         Path("errors").mkdir(parents=True, exist_ok=True)
-        with open("errors/scan_error.log", "w") as f:
-            f.write(f"Ошибка во время сканирования: {e}")
+        with open("errors/scan_error.log", "w", encoding="utf-8") as f:
+            f.write(f"Ошибка сканирования: {e}")
         return
 
     if args.json:
