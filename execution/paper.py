@@ -47,3 +47,15 @@ class PaperBroker:
         self._balance = balance
         self.orders = {}
         self.positions = {}
+
+    def cancel(self, order_id: str) -> bool:
+        if order_id in self.orders:
+            order = self.orders[order_id]
+            if order['status'] == 'filled':
+                if order['side'] == 'buy':
+                    self._balance += order['size'] * order['price']
+                elif order['side'] == 'sell':
+                    self._balance -= order['size'] * order['price']
+            del self.orders[order_id]
+            return True
+        return False
