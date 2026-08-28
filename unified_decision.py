@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
 from agents.pipeline import CloudAnalysis, JudgeVerdict
 
+__all__ = ["UnifiedDecision", "pipeline_decide"]
+
 @dataclass
 class UnifiedDecision:
     cloud_analyses: List[Dict[str, Any]]
