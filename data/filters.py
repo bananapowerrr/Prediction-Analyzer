@@ -3,6 +3,7 @@
 passes_all_gates объединяет три гейта.
 """
 
+from __future__ import annotations
 from core.models import Market
 
 def passes_liquidity_gate(market: Market, min_liquidity: float) -> bool:
@@ -29,5 +30,5 @@ def gate_reject_reasons(market: Market, min_liquidity: float, max_spread: float,
         reasons.append('low_volume')
     return reasons
 
-def filter_markets(markets: list, min_liquidity: float, max_spread: float, min_volume: float) -> list:
+def filter_markets(markets: list[Market], min_liquidity: float, max_spread: float, min_volume: float) -> list[Market]:
     return [market for market in markets if passes_all_gates(market, min_liquidity, max_spread, min_volume)]

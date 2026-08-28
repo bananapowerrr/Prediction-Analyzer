@@ -20,11 +20,9 @@ class ScanConfig:
 class MarketScanner:
     """Сканер получает рынки через клиент Polymarket и отфильтровывает их гейтами Prediction Analyzer.
     
-    Subclasses must implement :meth:`fetch_raw` (retrieve raw records from a
-    data source) and :meth:`parse` (convert raw records into ``Market`` 
-    models).
-    The :meth:`scan` method fetches, parses and applies the liquidity/spread/
-    volume gates defined in ``data.filters``.
+    Подклассы должны реализовать метод :meth:`fetch_raw` (получение сырых записей из источника данных)
+    и метод :meth:`parse` (конвертация сырых записей в модели ``Market``).
+    Метод :meth:`scan` выполняет получение, парсинг и применение гейтов ликвидности/разброса/объема, определенных в ``data.filters``.
     """
     
     def __init__(self, scan_config: Optional[ScanConfig] = None):
