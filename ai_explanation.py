@@ -21,7 +21,9 @@ def format_explanation(market_question: str, action: str, confidence: float) -> 
     :param confidence: Уверенность в действиях
     :return: Строка-пояснение
     """
-    return f"Для вопроса рынка '{market_question}' рекомендуется {action} с уверенностью {confidence:.2f}%."
+    explanation = f"Для вопроса рынка '{market_question}' рекомендуется {action}."
+    explanation += f"\nУверенность: {confidence:.2f}%."
+    return explanation
 
 def format_explanations(items: list[tuple]) -> list[str]:
     """
