@@ -3,7 +3,7 @@ import json
 import logging
 from data.scanner import run_scan
 from data.ranking import rank_markets
-from config import MIN_LIQUIDITY_USD, MAX_SPREAD_PCT, SCAN_LIMIT, MIN_VOLUME_24H
+from config import MIN_LIQUIDITY_USD, MAX_SPREAD_PCT, SCAN_LIMIT, MIN_VOLUME_24H, APP_VERSION
 from pathlib import Path
 from persistence import save_markets_json
 
@@ -23,7 +23,10 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.command == "version":
-        print("Prediction Analyzer 0.1.0")
+        if APP_VERSION:
+            print(APP_VERSION)
+        else:
+            print("0.1.0")
         return
 
     if args.command == "status":
