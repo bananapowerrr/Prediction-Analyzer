@@ -119,6 +119,9 @@ class MarketSchema(BaseModel):
     spread: float = Field(ge=0, le=1)
     volume_24h: float = Field(default=0.0, ge=0)
 
+    class Config:
+        extra = 'ignore'
+
     def to_market(self) -> Market:
         return Market(
             id=self.id,
