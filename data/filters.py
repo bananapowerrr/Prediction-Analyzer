@@ -80,11 +80,3 @@ def filter_markets(markets: list[Market], min_liquidity: float | None, max_sprea
     :return: Список фильтрованных рынков.
     """
     return [market for market in markets if passes_all_gates(market, min_liquidity, max_spread, min_volume)]
-
-def passes_soft_gates(market: Market, min_liquidity: float | None, max_spread: float | None, min_volume: float | None) -> bool:
-    return (passes_liquidity_gate(market, min_liquidity * 0.5) and
-            passes_spread_gate(market, max_spread * 1.5) and
-            passes_volume_gate(market, min_volume * 0.5))
-
-def count_passing(markets: list[Market], min_liquidity: float | None, max_spread: float | None, min_volume: float | None) -> int:
-    return len(filter_markets(markets, min_liquidity, max_spread, min_volume))
