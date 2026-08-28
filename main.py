@@ -6,6 +6,7 @@ from data.ranking import rank_markets
 from config import MIN_LIQUIDITY_USD, MAX_SPREAD_PCT, SCAN_LIMIT, MIN_VOLUME_24H, APP_VERSION
 from pathlib import Path
 from persistence import save_markets_json
+import sys
 
 def main() -> None:
     if not logging.getLogger().hasHandlers():
@@ -37,7 +38,8 @@ def main() -> None:
                 "config": {
                     "min_liquidity": MIN_LIQUIDITY_USD,
                     "max_spread": MAX_SPREAD_PCT,
-                    "scan_limit": SCAN_LIMIT
+                    "scan_limit": SCAN_LIMIT,
+                    "min_volume": MIN_VOLUME_24H
                 }
             }
             print(json.dumps(status, indent=4))
@@ -52,7 +54,7 @@ def main() -> None:
         Path("errors").mkdir(parents=True, exist_ok=True)
         with open("errors/scan_error.log", "w", encoding="utf-8") as f:
             f.write(f"Ошибка сканирования: {e}")
-        markets = []
+        sys.exit(1)
 
     if args.command == "rank":
         try:
@@ -62,7 +64,7 @@ def main() -> None:
             Path("errors").mkdir(parents=True, exist_ok=True)
             with open("errors/rank_error.log", "w", encoding="utf-8") as f:
                 f.write(f"Ошибка сортировки: {e}")
-            markets = []
+            sys.exit(1)
 
     if args.json:
         json_output = []
