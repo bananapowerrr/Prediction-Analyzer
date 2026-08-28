@@ -8,7 +8,3 @@ class ConfigError(TutorialError):
 
 class UIError(TutorialError):
     """Ошибка пользовательского интерфейса."""
-
-
-class PAError(TutorialError):
-    """Базовое исключение для приложения desktop-tutorial."""
