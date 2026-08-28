@@ -55,3 +55,15 @@ def parse_events(items: list) -> list[dict]:
         else:
             normalized_items.append(item)
     return normalized_items
+
+def filter_events_by_type(events: list, type_name: str) -> list:
+    """Фильтрует события по типу.
+
+    Аргументы:
+        events: список словарей с событиями.
+        type_name: тип события для фильтрации.
+
+    Возвращает:
+        Список словарей с событиями, соответствующими заданному типу.
+    """
+    return [event for event in events if event.get('type') == type_name]
