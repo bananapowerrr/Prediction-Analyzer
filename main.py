@@ -4,6 +4,7 @@ import logging
 from data.scanner import run_scan
 from config import MIN_LIQUIDITY_USD, MAX_SPREAD_PCT, SCAN_LIMIT, MIN_VOLUME_24H
 from pathlib import Path
+from persistence import save_markets_json
 
 def main() -> None:
     if not logging.getLogger().hasHandlers():
@@ -17,6 +18,7 @@ def main() -> None:
     parser.add_argument("--limit", type=int, default=SCAN_LIMIT, help="Ограничение количества сканируемых рынков")
     parser.add_argument("--json", action="store_true", help="Вывод результатов в формате JSON")
     parser.add_argument("--top", type=int, default=20, help="Количество верхних рынков для отображения")
+    parser.add_argument("--out", type=Path, help="Путь для сохранения результатов в JSON файл")
     args = parser.parse_args()
 
     if args.command == "status":
@@ -55,6 +57,10 @@ def main() -> None:
                 "volume_24h": m.volume_24h
             })
         print(json.dumps(json_output, indent=4))
+        if args.out:
+            args.out.parent.mkdir(parents=True, exist_ok=True)
+            with open(args.out, "w", encoding="utf-8") as f:
+                json.dump(json_output, f, indent=4)
     else:
         print(f"Найдено {len(markets)} рынков")
         for m in markets[:args.top]:
