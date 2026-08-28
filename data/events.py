@@ -43,3 +43,15 @@ class ChainMetric(BaseModel):
     metric_name: str
     value: float
     timestamp: float = Field(default_factory=float)
+
+def parse_events(items: list) -> list[dict]:
+    """Безопасно мапит элементы через normalize если есть, иначе возвращает items как есть с фильтром dict."""
+    normalized_items = []
+    for item in items:
+        if isinstance(item, dict):
+            normalized_item = normalize_event(item)
+            if normalized_item:
+                normalized_items.append(normalized_item)
+        else:
+            normalized_items.append(item)
+    return normalized_items
