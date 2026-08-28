@@ -10,19 +10,20 @@ def main() -> None:
         logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 
     parser = argparse.ArgumentParser(description="Prediction Analyzer — сканер рынков Polymarket")
-    parser.add_argument("command", nargs="?", default="scan", choices=["scan", "status"], help="Command to execute")
-    parser.add_argument("--min-liquidity", type=float, default=MIN_LIQUIDITY_USD, help="Minimum liquidity in USD")
-    parser.add_argument("--max-spread", type=float, default=MAX_SPREAD_PCT, help="Maximum spread in percentage")
-    parser.add_argument("--min-volume", type=float, default=MIN_VOLUME_24H, help="Minimum volume in 24 hours")
-    parser.add_argument("--limit", type=int, default=SCAN_LIMIT, help="Limit of markets to scan")
-    parser.add_argument("--json", action="store_true", help="Output results in JSON format")
-    parser.add_argument("--top", type=int, default=20, help="Number of top markets to display")
+    parser.add_argument("command", nargs="?", default="scan", choices=["scan", "status"], help="Команда для выполнения")
+    parser.add_argument("--min-liquidity", type=float, default=MIN_LIQUIDITY_USD, help="Минимальная ликвидность в USD")
+    parser.add_argument("--max-spread", type=float, default=MAX_SPREAD_PCT, help="Максимальный спред в процентах")
+    parser.add_argument("--min-volume", type=float, default=MIN_VOLUME_24H, help="Минимальный объем за 24 часа")
+    parser.add_argument("--limit", type=int, default=SCAN_LIMIT, help="Ограничение количества сканируемых рынков")
+    parser.add_argument("--json", action="store_true", help="Вывод результатов в формате JSON")
+    parser.add_argument("--top", type=int, default=20, help="Количество верхних рынков для отображения")
     args = parser.parse_args()
 
     if args.command == "status":
         if args.json:
             status = {
                 "status": "ready",
+                "app": "prediction-analyzer",
                 "config": {
                     "min_liquidity": MIN_LIQUIDITY_USD,
                     "max_spread": MAX_SPREAD_PCT,
@@ -31,16 +32,16 @@ def main() -> None:
             }
             print(json.dumps(status, indent=4))
         else:
-            print("scanner ready")
+            print("Prediction Analyzer ready")
         return
 
     try:
         markets = run_scan(min_liquidity=args.min_liquidity, max_spread=args.max_spread, min_volume=args.min_volume, limit=args.limit)
     except Exception as e:
-        logging.error(f"Error during scan: {e}")
+        logging.error(f"Ошибка во время сканирования: {e}")
         Path("errors").mkdir(parents=True, exist_ok=True)
         with open("errors/scan_error.log", "w") as f:
-            f.write(f"Error during scan: {e}")
+            f.write(f"Ошибка во время сканирования: {e}")
         return
 
     if args.json:
@@ -55,9 +56,9 @@ def main() -> None:
             })
         print(json.dumps(json_output, indent=4))
     else:
-        print(f"Found {len(markets)} markets")
+        print(f"Найдено {len(markets)} рынков")
         for m in markets[:args.top]:
-            print(f"Market: {m.question}")
+            print(f"Рынок: {m.question}")
 
 if __name__ == "__main__":
     main()
