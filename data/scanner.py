@@ -152,7 +152,14 @@ def filter_by_volume_threshold(markets: List[Market], min_volume: float) -> List
 
 
 def scan_markets(min_liquidity: Optional[float] = None, max_spread: Optional[float] = None, min_volume: Optional[float] = None, limit: Optional[int] = None) -> List[Market]:
-    """Удобная обёртка: создаёт PolymarketScanner с переданными гейтами и запускает скан."""
+    """Удобная обёртка: создаёт PolymarketScanner с переданными гейтами и запускает скан.
+
+    :param min_liquidity: Минимальная ликвидность рынка
+    :param max_spread: Максимальный разброс рынка
+    :param min_volume: Минимальный объем за 24 часа
+    :param limit: Ограничение на количество рынков
+    :return: Список отфильтрованных рынков
+    """
     scanner = PolymarketScanner(scan_config=ScanConfig(
         min_liquidity=min_liquidity,
         max_spread=max_spread,
@@ -163,7 +170,15 @@ def scan_markets(min_liquidity: Optional[float] = None, max_spread: Optional[flo
 
 
 def run_scan(min_liquidity: Optional[float] = None, max_spread: Optional[float] = None, min_volume: Optional[float] = None, limit: Optional[int] = None, sort_by_liquidity: bool = True) -> List[Market]:
-    """Запускает скан рынков Polymarket через рабочего сканера PolymarketScanner."""
+    """Запускает скан рынков Polymarket через рабочего сканера PolymarketScanner.
+
+    :param min_liquidity: Минимальная ликвидность рынка
+    :param max_spread: Максимальный разброс рынка
+    :param min_volume: Минимальный объем за 24 часа
+    :param limit: Ограничение на количество рынков
+    :param sort_by_liquidity: Сортировать по ликвидности
+    :return: Список отфильтрованных и отсортированных рынков
+    """
     scan_config = ScanConfig(
         min_liquidity=min_liquidity,
         max_spread=max_spread,
