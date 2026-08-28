@@ -4,6 +4,12 @@ from typing import Dict, Tuple
 
 from core.models import Market
 
+"""
+Модуль для расчетов и анализа рисков в Prediction Analyzer.
+
+Включает в себя функции для расчета ожидаемого значения (EV), фракционного Келли, размера позиции и доверительных интервалов.
+"""
+
 @dataclass
 class OutcomeAssessment:
     outcome: str
@@ -37,6 +43,13 @@ def calculate_expected_value(market: Market, outcome_probabilities: Dict[str, fl
     return ev
 
 def calculate_fractional_kelly(market: Market, outcome_probabilities: Dict[str, float]) -> float:
+    """
+    Рассчитывает фракционный Келли для заданного рынка и вероятностей исходов.
+
+    :param market: Маркет для расчета.
+    :param outcome_probabilities: Словарь с вероятностями исходов.
+    :return: Фракционный Келли в диапазоне [0.0, 1.0].
+    """
     ev = calculate_expected_value(market, outcome_probabilities)
     risk_free_rate = 0.01  # Примерный риск-фрийный процент
     denominator = market.spread * market.liquidity
