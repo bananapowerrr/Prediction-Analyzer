@@ -180,3 +180,14 @@ class PolymarketAdapter:
     
     async def close(self):
         await self.client.close()
+    
+    def parse_market_record(self, raw: dict) -> dict | None:
+        if 'id' not in raw:
+            return None
+        return {
+            'id': raw['id'],
+            'question': raw.get('question', None),
+            'liquidity': raw.get('liquidity', None),
+            'spread': raw.get('spread', None),
+            'volume_24h': raw.get('volume_24h', None)
+        }
