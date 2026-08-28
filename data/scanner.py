@@ -2,7 +2,6 @@
 Сканер получает рынки через клиент Polymarket и отфильтровывает их гейтами Prediction Analyzer.
 """
 
-import asyncio
 import inspect
 import logging
 from dataclasses import dataclass
@@ -102,9 +101,11 @@ class PolymarketScanner(MarketScanner):
 
     def fetch_raw(self, limit: Optional[int] = None) -> list:
         limit = limit if limit is not None else self.scan_config.limit
+        limit = max(1, min(200, limit))  # Clamp limit to [1, 200]
         try:
             result = self.client.fetch_markets(limit=limit)
             if inspect.isawaitable(result):
+                import asyncio
                 result = asyncio.run(result)
         except Exception as e:
             logger.warning("Не удалось получить рынки с Polymarket API (limit=%d): %s", limit, e)
