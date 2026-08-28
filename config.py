@@ -150,3 +150,5 @@ LOCAL_OLLAMA_BASE_URL = settings.local.ollama_base_url
 LOCAL_JUDGE_MODEL = settings.local.judge_model
 LOCAL_TIMEOUT = settings.local.timeout
 LOCAL_TEMPERATURE = settings.local.temperature
+
+DISPATCHER_TEST_MARKER = "v6.1"
