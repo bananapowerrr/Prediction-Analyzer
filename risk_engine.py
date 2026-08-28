@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Dict, Tuple, Optional
 
 from core.models import Market
+from core.utils import safe_float
 
 """
 Модуль для расчетов и анализа рисков в Prediction Analyzer.
@@ -43,10 +44,12 @@ class OutcomeAssessment:
         }
 
 def passes_liquidity_gate(market: Market, min_liquidity: Optional[float] = None) -> bool:
-    return market.liquidity > (min_liquidity if min_liquidity is not None else 0)
+    min_liquidity = safe_float(min_liquidity, 0)
+    return market.liquidity > min_liquidity
 
 def passes_spread_gate(market: Market, max_spread: Optional[float] = None) -> bool:
-    return market.spread < (max_spread if max_spread is not None else float('inf'))
+    max_spread = safe_float(max_spread, float('inf'))
+    return market.spread < max_spread
 
 def calculate_expected_value(market: Market, outcome_probabilities: Dict[str, float]) -> float:
     """
@@ -62,9 +65,9 @@ def calculate_expected_value(market: Market, outcome_probabilities: Dict[str, fl
     ev = 0
     for outcome, probability in outcome_probabilities.items():
         if outcome == 'win':
-            ev += market.liquidity * probability
+            ev += market.liquidity * safe_float(probability, 0)
         elif outcome == 'loss':
-            ev -= market.liquidity * probability
+            ev -= market.liquidity * safe_float(probability, 0)
     return ev
 
 def calculate_fractional_kelly(market: Market, outcome_probabilities: Dict[str, float]) -> float:
