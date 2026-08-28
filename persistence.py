@@ -1,5 +1,11 @@
 import sqlite3
 from typing import Dict, List
+import os
+import json
+import logging
+
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
 
 class PersistenceManager:
     def __init__(self, db_path: str):
@@ -47,3 +53,23 @@ class PersistenceManager:
         self.cursor.execute('SELECT * FROM reports')
         results = self.cursor.fetchall()
         return [dict(row) for row in results]
+
+    def save_markets_json(self, path: str, markets: List[Dict]):
+        """Сохранить список dict (id, question, liquidity, spread, volume_24h) в JSON UTF-8."""
+        try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(markets, f, ensure_ascii=False, indent=4)
+        except IOError as e:
+            logger.error(f"Ошибка при сохранении файла {path}: {e}")
+
+    def load_markets_json(self, path: str) -> List[Dict]:
+        """Загрузить список dict (id, question, liquidity, spread, volume_24h) из JSON UTF-8. Если файла нет — []."""
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            return []
+        except json.JSONDecodeError as e:
+            logger.error(f"Ошибка при загрузке файла {path}: {e}")
+            return []
