@@ -1,3 +1,7 @@
+"""
+Настройки Prediction Analyzer из environment переменных.
+"""
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
