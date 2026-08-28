@@ -84,8 +84,16 @@ def calculate_confidence_interval(
     sample_size: int,
     confidence_level: float = 0.95,
 ) -> Tuple[float, float]:
+    """
+    Оценивает доверительный интервал для заданной вероятности и размера выборки.
+
+    :param probability: Вероятность исхода.
+    :param sample_size: Размер выборки.
+    :param confidence_level: Уровень доверия (по умолчанию 0.95).
+    :return: Доверительный интервал в виде кортежа (нижняя граница, верхняя граница).
+    """
     if sample_size <= 0:
-        return (0.0, 0.0)
+        return (0.0, 0.0)  # Если размер выборки не положителен, возвращаем нулевой интервал
     p = min(max(probability, 0.0), 1.0)
     se = math.sqrt(p * (1.0 - p) / sample_size)
     z = _z_score(confidence_level)
