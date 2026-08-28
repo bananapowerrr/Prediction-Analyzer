@@ -21,3 +21,6 @@ def rank_markets(markets: Optional[List[Market]] = None) -> List[Market]:
         return m.score / m.liquidity
 
     return sorted(markets, key=_ratio, reverse=True)
+
+
+__all__ = ["calculate_score", "rank_markets"]
