@@ -157,3 +157,13 @@ def assess_outcome(
         interval_lower=lower,
         interval_upper=upper,
     )
+
+def max_position_usd(bankroll: float, kelly_f: float) -> float:
+    """
+    Определяет максимальный размер позиции в долларах.
+
+    :param bankroll: Начальный капитал.
+    :param kelly_f: Фракционный Келли.
+    :return: Максимальный размер позиции в долларах.
+    """
+    return min(bankroll, bankroll * kelly_f)

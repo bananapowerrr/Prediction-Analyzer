@@ -57,13 +57,21 @@ class PersistenceManager:
         return [dict(row) for row in results]
 
     def save_markets_json(self, markets: list, path: str):
-        save_markets_json(markets, path)
+        os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+        data = [_to_dict(m) for m in markets]
+        with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as tmp:
+            json.dump(data, tmp, ensure_ascii=False, indent=4)
+        os.replace(tmp.name, path)
 
     def load_markets_json(self, path: str) -> list:
-        return load_markets_json(path)
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return []
 
     def save_markets_csv(self, path: str, markets: List[Dict]):
-        """Сохранить список dict (id, question, liquidity, spread, volume_24h) в CSV UTF-8 с заголовком."""
+        """Сохранить список dict (id, question, liquidity, spread, volume_24h) в CSV UTF-8 с заголовком id,question,liquidity,spread,volume_24h."""
         try:
             normalized_markets = [{k: v for k, v in market.items() if k in ['id', 'question', 'liquidity', 'spread', 'volume_24h']} for market in markets]
             with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as temp_file:
@@ -87,8 +95,7 @@ def save_markets_json(markets: list, path: str):
     data = [_to_dict(m) for m in markets]
     with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as tmp:
         json.dump(data, tmp, ensure_ascii=False, indent=4)
-        tmp_path = tmp.name
-    os.replace(tmp_path, path)
+    os.replace(tmp.name, path)
 
 def load_markets_json(path: str) -> list:
     try:
