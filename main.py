@@ -9,7 +9,7 @@ from persistence import save_markets_json
 
 def main() -> None:
     if not logging.getLogger().hasHandlers():
-        logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+        logging.basicConfig(level=logging.INFO, format="%(levelname)s PA %(name)s: %(message)s")
 
     parser = argparse.ArgumentParser(description="Prediction Analyzer — сканер рынков Polymarket")
     parser.add_argument("command", nargs="?", default="scan", choices=["scan", "rank", "status", "version"], help="Команда для выполнения")
