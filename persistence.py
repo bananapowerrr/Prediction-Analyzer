@@ -72,6 +72,8 @@ class PersistenceManager:
 
     def save_markets_csv(self, path: str, markets: List[Dict]):
         """Сохранить список dict (id, question, liquidity, spread, volume_24h) в CSV UTF-8 с заголовком id,question,liquidity,spread,volume_24h."""
+        if not markets:
+            return
         try:
             normalized_markets = [{k: v for k, v in market.items() if k in ['id', 'question', 'liquidity', 'spread', 'volume_24h']} for market in markets]
             with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as temp_file:
@@ -106,6 +108,8 @@ def load_markets_json(path: str) -> list:
 
 def save_markets_csv(path: str, markets: List[Dict]):
     """Сохранить список dict (id, question, liquidity, spread, volume_24h) в CSV UTF-8 с заголовком id,question,liquidity,spread,volume_24h."""
+    if not markets:
+        return
     try:
         normalized_markets = [{k: v for k, v in market.items() if k in ['id', 'question', 'liquidity', 'spread', 'volume_24h']} for market in markets]
         with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as temp_file:

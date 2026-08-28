@@ -191,3 +191,20 @@ def test_passes_soft_gates_marginally_below_hard_gates():
 def test_passes_soft_gates_fails_below_soft_thresholds():
     market = _make_market(liquidity=MIN_LIQ * 0.49)
     assert passes_soft_gates(market, MIN_LIQ, MAX_SPREAD, MIN_VOL) is False
+
+
+# --- Boundary tests for Market.is_tradeable ---
+
+def test_market_tradeable_boundary_liquidity_above():
+    market = _make_market(liquidity=MIN_LIQ + 1.0)
+    assert market.is_tradeable(MIN_LIQ, MAX_SPREAD, MIN_VOL) is True
+
+
+def test_market_tradeable_boundary_spread_below():
+    market = _make_market(spread=MAX_SPREAD - 0.01)
+    assert market.is_tradeable(MIN_LIQ, MAX_SPREAD, MIN_VOL) is True
+
+
+def test_market_tradeable_boundary_volume_above():
+    market = _make_market(volume_24h=MIN_VOL + 1.0)
+    assert market.is_tradeable(MIN_LIQ, MAX_SPREAD, MIN_VOL) is True
