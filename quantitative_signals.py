@@ -68,3 +68,15 @@ def signal_to_dict(signal: QuantitativeSignal) -> Dict[str, Any]:
         "confidence": signal.confidence,
         "indicators": signal.indicators
     }
+
+def build_signals(scores: List[tuple[str, float]]) -> List[QuantitativeSignal]:
+    """
+    Создает список сигналов на основе списка кортежей (идентификатор рынка, оценка).
+    
+    :param scores: Список кортежей (идентификатор рынка, оценка)
+    :return: Список сигналов
+    """
+    signals = []
+    for market_id, score in scores:
+        signals.append(build_signal(market_id, score))
+    return signals

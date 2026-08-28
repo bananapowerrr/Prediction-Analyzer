@@ -34,6 +34,16 @@ def passes_spread_gate(market: Market, max_spread: float) -> bool:
     return market.spread < max_spread
 
 def calculate_expected_value(market: Market, outcome_probabilities: Dict[str, float]) -> float:
+    """
+    Рассчитывает ожидаемое значение (EV) для заданного рынка и вероятностей исходов.
+
+    :param market: Маркет для расчета.
+    :param outcome_probabilities: Словарь с вероятностями исходов.
+    :return: Ожидаемое значение (EV).
+    """
+    if not outcome_probabilities:
+        raise ValueError("Словарь вероятностей исходов не может быть пустым")
+
     ev = 0
     for outcome, probability in outcome_probabilities.items():
         if outcome == 'win':
