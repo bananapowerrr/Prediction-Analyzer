@@ -8,21 +8,51 @@ from __future__ import annotations
 from core.models import Market
 
 def passes_liquidity_gate(market: Market, min_liquidity: float | None) -> bool:
+    """
+    Проверяет, проходит ли рынок гейт ликвидности.
+
+    :param market: Рынок для проверки.
+    :param min_liquidity: Минимальная ликвидность для прохождения гейта ликвидности.
+    :return: True, если рынок проходит гейт ликвидности, иначе False.
+    """
     if min_liquidity is None:
         return True
     return market.liquidity >= min_liquidity
 
 def passes_spread_gate(market: Market, max_spread: float | None) -> bool:
+    """
+    Проверяет, проходит ли рынок гейт спреда.
+
+    :param market: Рынок для проверки.
+    :param max_spread: Максимальный спред для прохождения гейта спреда.
+    :return: True, если рынок проходит гейт спреда, иначе False.
+    """
     if max_spread is None:
         return True
     return market.spread <= max_spread
 
 def passes_volume_gate(market: Market, min_volume: float | None) -> bool:
+    """
+    Проверяет, проходит ли рынок гейт объема.
+
+    :param market: Рынок для проверки.
+    :param min_volume: Минимальный объем за 24 часа для прохождения гейта объема.
+    :return: True, если рынок проходит гейт объема, иначе False.
+    """
     if min_volume is None:
         return True
     return market.volume_24h >= min_volume
 
 def passes_all_gates(market: Market, min_liquidity: float | None, max_spread: float | None, min_volume: float | None) -> bool:
+    """
+    Проверяет, проходит ли рынок все три гейта (ликвидность, спред и объем).
+
+    :param market: Рынок для проверки.
+    :param min_liquidity: Минимальная ликвидность для прохождения гейта ликвидности.
+    :param max_spread: Максимальный спред для прохождения гейта спреда.
+    :param min_volume: Минимальный объем за 24 часа для прохождения гейта объема.
+    :return: True, если рынок проходит все три гейта, иначе False.
+    """
     if min_liquidity is None and max_spread is None and min_volume is None:
         return True
     return (passes_liquidity_gate(market, min_liquidity) and
