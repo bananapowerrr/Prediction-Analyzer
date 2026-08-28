@@ -94,6 +94,14 @@ class StateManager:
         """
         self.conn.close()
 
+    def export_recent_ids(self) -> List[str]:
+        """
+        Возвращает копию недавних market id.
+
+        :return: Список недавних market id
+        """
+        return list(self.recent_markets)
+
 def get_default_state() -> StateManager:
     """
     Возвращает экземпляр StateManager с базой данных по умолчанию.
