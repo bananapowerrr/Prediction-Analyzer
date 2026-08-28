@@ -83,10 +83,22 @@ def determine_position_size(market: Market, outcome_probabilities: Dict[str, flo
     return position_size
 
 def _z_score(confidence_level: float) -> float:
+    """
+    Вычисляет z-оценку для заданного уровня доверия.
+
+    :param confidence_level: Уровень доверия.
+    :return: Значение z-оценки.
+    """
     tail = (1.0 - confidence_level) / 2.0
     return -math.sqrt(2.0) * _erf_inv(2.0 * tail - 1.0)
 
 def _erf_inv(x: float) -> float:
+    """
+    Вычисляет обратную функцию ошибок для заданного значения x.
+
+    :param x: Значение x.
+    :return: Значение обратной функции ошибок.
+    """
     a = 0.147
     ln = math.log(1.0 - x * x)
     term = 2.0 / (math.pi * a) + ln / 2.0
