@@ -1,12 +1,13 @@
-"""Tests for the scanner's sort-by-liquidity behaviour (run_scan).
+"""Тесты для сортировки сканера по ликвидности (run_scan).
 
-These tests mock MarketScanner.scan so no real network access is performed.
-When mocking is possible we verify sort_by_liquidity directly; as a fallback
-we also exercise the sorted logic through run_scan itself.
+Эти тесты мокают MarketScanner.scan, чтобы не требовалось реального доступа к сети.
+Когда это возможно, мы проверяем sort_by_liquidity напрямую; в качестве альтернативы мы также проверяем
+сортировку через run_scan.
 """
 
 import unittest
 from unittest.mock import patch
+from typing import List
 
 from core.models import Market
 from data.scanner import MarketScanner, ScanConfig, run_scan
@@ -23,7 +24,7 @@ def _make_market(market_id: str, liquidity: float) -> Market:
 
 
 class TestRunScanSortByLiquidity(unittest.TestCase):
-    """Verify that run_scan sorts the scanned markets by liquidity."""
+    """Проверка сортировки сканированных рынков по ликвидности."""
 
     def setUp(self) -> None:
         self.markets = [
@@ -33,32 +34,32 @@ class TestRunScanSortByLiquidity(unittest.TestCase):
         ]
 
     @patch.object(MarketScanner, "scan")
-    def test_sorts_by_liquidity_descending(self, mock_scan):
+    def test_sorts_by_liquidity_descending(self, mock_scan: patch):
         mock_scan.return_value = self.markets
         result = run_scan(sort_by_liquidity=True)
         self.assertEqual([m.id for m in result], ["m3", "m1", "m2"])
         self.assertEqual([m.liquidity for m in result], [20.0, 10.0, 5.0])
 
     @patch.object(MarketScanner, "scan")
-    def test_sort_is_default(self, mock_scan):
+    def test_sort_is_default(self, mock_scan: patch):
         mock_scan.return_value = self.markets
         result = run_scan()
         self.assertEqual([m.id for m in result], ["m3", "m1", "m2"])
 
     @patch.object(MarketScanner, "scan")
-    def test_disabled_sort_preserves_scan_order(self, mock_scan):
+    def test_disabled_sort_preserves_scan_order(self, mock_scan: patch):
         mock_scan.return_value = self.markets
         result = run_scan(sort_by_liquidity=False)
         self.assertEqual([m.id for m in result], ["m1", "m2", "m3"])
 
     @patch.object(MarketScanner, "scan")
-    def test_limit_applied_after_sort(self, mock_scan):
+    def test_limit_applied_after_sort(self, mock_scan: patch):
         mock_scan.return_value = self.markets
         result = run_scan(sort_by_liquidity=True, limit=2)
         self.assertEqual([m.id for m in result], ["m3", "m1"])
 
     @patch.object(MarketScanner, "scan")
-    def test_stable_sort_keeps_relative_order_for_equal_liquidity(self, mock_scan):
+    def test_stable_sort_keeps_relative_order_for_equal_liquidity(self, mock_scan: patch):
         mock_scan.return_value = [
             _make_market("a", 7.0),
             _make_market("b", 7.0),
@@ -68,17 +69,17 @@ class TestRunScanSortByLiquidity(unittest.TestCase):
         self.assertEqual([m.id for m in result], ["a", "b", "c"])
 
     @patch.object(MarketScanner, "scan")
-    def test_empty_scan_returns_empty_list(self, mock_scan):
+    def test_empty_scan_returns_empty_list(self, mock_scan: patch):
         mock_scan.return_value = []
         self.assertEqual(run_scan(sort_by_liquidity=True), [])
 
 
 class TestScanConfigSortIntegration(unittest.TestCase):
-    """ScanConfig built by run_scan is forwarded to MarketScanner."""
+    """ScanConfig, построенный run_scan, передается в MarketScanner."""
 
     @patch.object(MarketScanner, "scan")
     @patch("data.scanner.MarketScanner")
-    def test_run_scan_passes_config_to_scanner(self, MockScanner, mock_scan):
+    def test_run_scan_passes_config_to_scanner(self, MockScanner: patch, mock_scan: patch):
         MockScanner.return_value.scan.return_value = []
         run_scan(
             min_liquidity=500.0,
@@ -96,13 +97,14 @@ class TestScanConfigSortIntegration(unittest.TestCase):
 
 
 class TestSortedLogicHelper(unittest.TestCase):
-    """Unit test for the sorted-by-liquidity logic in isolation.
+    """Тест для логики сортировки по ликвидности в изоляции.
 
-    Mirrors the exact expression used by run_scan so the helper stays in
-    sync even if run_scan is refactored to delegate to a dedicated function.
+    Сопоставляется с точно таким же выражением, используемым в run_scan, чтобы помочь поддерживать
+    согласованность даже если run_scan будет рефакториться, чтобы делегировать выполнение
+    в отдельную функцию.
     """
 
-    def _sort_by_liquidity(self, markets):
+    def _sort_by_liquidity(self, markets: List[Market]) -> List[Market]:
         return sorted(markets, key=lambda m: m.liquidity, reverse=True)
 
     def test_helper_sorts_descending(self):
