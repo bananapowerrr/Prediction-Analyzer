@@ -5,7 +5,7 @@ from data.filters import passes_all_gates
 
 class TestMVPScanOffline(unittest.TestCase):
     @patch.object(PolymarketClient, 'fetch_markets')
-    def test_run_scan_filter(self, mock_fetch_markets):
+    def test_run_scan_filter(self, mock_fetch_markets) -> None:
         # Mock fetch_markets to return 2 markets
         mock_fetch_markets.return_value = [
             {'id': 'market1', 'liquidity': 50000, 'spread': 0.02, 'volume_24h': 100000},
