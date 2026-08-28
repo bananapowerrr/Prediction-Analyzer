@@ -1,5 +1,5 @@
 """
-Настройки Prediction Analyzer из environment переменных.
+Настройки Prediction Analyzer, загружаемые из переменных окружения.
 """
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -18,11 +18,11 @@ class RpcSettings(BaseSettings):
     request_timeout: float = 30.0
 
     @property
-    def endpoint_list(self) -> list:
+    def endpoint_list(self) -> list[str]:
         primary = [self.endpoint] if self.endpoint else []
         extra = [e.strip() for e in self.endpoints.split(",") if e.strip()]
-        seen: dict = {}
-        result = []
+        seen: dict[str, bool] = {}
+        result: list[str] = []
         for ep in primary + extra:
             if ep not in seen:
                 seen[ep] = True
@@ -43,11 +43,11 @@ class BaseRpcSettings(BaseSettings):
     request_timeout: float = 30.0
 
     @property
-    def endpoint_list(self) -> list:
+    def endpoint_list(self) -> list[str]:
         primary = [self.endpoint] if self.endpoint else []
         extra = [e.strip() for e in self.endpoints.split(",") if e.strip()]
-        seen: dict = {}
-        result = []
+        seen: dict[str, bool] = {}
+        result: list[str] = []
         for ep in primary + extra:
             if ep not in seen:
                 seen[ep] = True
@@ -154,4 +154,3 @@ LOCAL_TEMPERATURE = settings.local.temperature
 
 APP_NAME = 'prediction-analyzer'
 APP_TITLE = 'Prediction Analyzer'
-APP_VERSION = APP_VERSION
