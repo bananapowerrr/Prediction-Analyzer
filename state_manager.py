@@ -1,8 +1,12 @@
 import sqlite3
 from typing import List, Dict, Set, Any
 import json
+import logging
 
 MAX_RECENT = 500
+
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
 
 class StateManager:
     _instance = None
@@ -45,10 +49,13 @@ class StateManager:
         :param event_type: Тип события
         :param data: Данные события
         """
-        self.cursor.execute('''
-            INSERT INTO world_state (event_type, data) VALUES (?, ?)
-        ''', (event_type, str(data)))
-        self.conn.commit()
+        try:
+            self.cursor.execute('''
+                INSERT INTO world_state (event_type, data) VALUES (?, ?)
+            ''', (event_type, str(data)))
+            self.conn.commit()
+        except Exception as e:
+            logger.error(f"Error saving event: {e}")
 
     def get_events(self, event_type: str = None) -> List[Dict]:
         """
@@ -57,14 +64,18 @@ class StateManager:
         :param event_type: Тип события (если None, возвращаются все события)
         :return: Список событий
         """
-        if event_type:
-            self.cursor.execute(
-                'SELECT * FROM world_state WHERE event_type = ?', (event_type,)
-            )
-        else:
-            self.cursor.execute('SELECT * FROM world_state')
-        columns = [col[0] for col in self.cursor.description]
-        return [dict(zip(columns, row)) for row in self.cursor.fetchall()]
+        try:
+            if event_type:
+                self.cursor.execute(
+                    'SELECT * FROM world_state WHERE event_type = ?', (event_type,)
+                )
+            else:
+                self.cursor.execute('SELECT * FROM world_state')
+            columns = [col[0] for col in self.cursor.description]
+            return [dict(zip(columns, row)) for row in self.cursor.fetchall()]
+        except Exception as e:
+            logger.error(f"Error fetching events: {e}")
+            return []
 
     def remember_markets(self, ids: List[str]):
         """
@@ -117,7 +128,8 @@ class StateManager:
                 "events": self.get_events()
             }
             return json.dumps(data, indent=4)
-        except (TypeError, OverflowError, json.JSONDecodeError):
+        except (TypeError, OverflowError, json.JSONDecodeError) as e:
+            logger.error(f"Error exporting JSON: {e}")
             return {}
 
     @staticmethod
@@ -130,5 +142,6 @@ class StateManager:
         """
         try:
             return json.loads(json_data)
-        except (json.JSONDecodeError, TypeError):
+        except (json.JSONDecodeError, TypeError) as e:
+            logger.error(f"Error loading JSON: {e}")
             return {}
