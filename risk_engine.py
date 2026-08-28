@@ -18,9 +18,6 @@ __all__ = [
     "calculate_expected_value",
     "calculate_fractional_kelly",
     "determine_position_size",
-    "_z_score",
-    "_erf_inv",
-    "estimate_outcome_probability",
     "calculate_confidence_interval",
     "assess_outcome",
     "max_position_usd",
@@ -104,34 +101,6 @@ def determine_position_size(market: Market, outcome_probabilities: Dict[str, flo
     position_size = min(initial_capital * kelly_fraction, initial_capital * max_fraction)
     return position_size
 
-def _z_score(confidence_level: float) -> float:
-    """
-    Вычисляет z-оценку для заданного уровня доверия.
-
-    :param confidence_level: Уровень доверия.
-    :return: Значение z-оценки.
-    """
-    tail = (1.0 - confidence_level) / 2.0
-    return -math.sqrt(2.0) * _erf_inv(2.0 * tail - 1.0)
-
-def _erf_inv(x: float) -> float:
-    """
-    Вычисляет обратную функцию ошибок для заданного значения x.
-
-    :param x: Значение x.
-    :return: Значение обратной функции ошибок.
-    """
-    a = 0.147
-    ln = math.log(1.0 - x * x)
-    term = 2.0 / (math.pi * a) + ln / 2.0
-    return math.copysign(math.sqrt(math.sqrt(term * term - ln / a) - term), x)
-
-def estimate_outcome_probability(outcome_probabilities: Dict[str, float], outcome: str) -> float:
-    total = sum(outcome_probabilities.values())
-    if total <= 0:
-        return 0.0
-    return outcome_probabilities.get(outcome, 0.0) / total
-
 def calculate_confidence_interval(
     probability: float,
     sample_size: int,
@@ -154,6 +123,30 @@ def calculate_confidence_interval(
     lower = max(0.0, p - margin)
     upper = min(1.0, p + margin)
     return (lower, upper)
+
+def _z_score(confidence_level: float) -> float:
+    """
+    Возвращает значение z для заданного уровня доверия.
+
+    :param confidence_level: Уровень доверия.
+    :return: Значение z.
+    """
+    if confidence_level == 0.95:
+        return 1.96
+    elif confidence_level == 0.99:
+        return 2.58
+    else:
+        raise ValueError("Поддерживается только 95% и 99% уровней доверия")
+
+def estimate_outcome_probability(outcome_probabilities: Dict[str, float], outcome: str) -> float:
+    """
+    Оценивает вероятность исхода на основе словаря вероятностей исходов.
+
+    :param outcome_probabilities: Словарь с вероятностями исходов.
+    :param outcome: Ожидаемый исход.
+    :return: Оценка вероятности исхода.
+    """
+    return outcome_probabilities.get(outcome, 0.0)
 
 def assess_outcome(
     outcome_probabilities: Dict[str, float],
