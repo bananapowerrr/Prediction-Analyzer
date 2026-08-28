@@ -59,3 +59,10 @@ class PaperBroker:
             del self.orders[order_id]
             return True
         return False
+
+    def snapshot(self) -> dict:
+        return {
+            'balance': self._balance,
+            'positions': self.get_positions(),
+            'orders': list(self.orders.values())
+        }
