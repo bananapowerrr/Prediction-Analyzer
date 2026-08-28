@@ -81,8 +81,9 @@ def main() -> None:
                 json.dump(json_output, f, indent=4)
     else:
         print(f"Найдено {len(markets)} рынков")
+        print(f"{'ID':<10}{'Question':<60}{'Liquidity':<15}{'Spread':<10}{'Volume 24h':<15}")
         for m in markets[:args.top]:
-            print(f"Рынок: {m.question}")
+            print(f"{m.id:<10}{m.question[:60]:<60}{m.liquidity:<15}{m.spread:<10}{m.volume_24h:<15}")
 
 if __name__ == "__main__":
     main()

@@ -18,23 +18,8 @@ class Order:
     price: float
     maker: Optional[str] = None
 
-    def __post_init__(self) -> None:
-        if not self.order_id:
-            raise ValueError("order_id is required")
-        if not self.market_id:
-            raise ValueError("market_id is required")
-        if self.side not in ("buy", "sell"):
-            raise ValueError("side must be 'buy' or 'sell'")
-        if not isinstance(self.size, (int, float)) or self.size <= 0:
-            raise ValueError("size must be a positive number")
-        if not isinstance(self.price, (int, float)) or not (0.0 < self.price <= 1.0):
-            raise ValueError("price must be in the range (0, 1]")
-
     def __repr__(self) -> str:
-        return (
-            f"Order(id={self.order_id}, market={self.market_id}, "
-            f"side={self.side}, size={self.size}, price={self.price})"
-        )
+        return f"Order(id={self.order_id}, market={self.market_id}, side={self.side}, size={self.size}, price={self.price})"
 
     def to_dict(self) -> dict:
         return {
@@ -56,10 +41,7 @@ class Market:
     volume_24h: float = 0.0
 
     def __repr__(self) -> str:
-        return (
-            f"Market(id={self.id}, liquidity={self.liquidity}, spread={self.spread}, "
-            f"volume_24h={self.volume_24h})"
-        )
+        return f"Market(id={self.id}, liquidity={self.liquidity}, spread={self.spread}, volume_24h={self.volume_24h})"
 
     def is_tradeable(self, min_liq: float, max_sp: float, min_vol: float) -> bool:
         return (
@@ -75,19 +57,8 @@ class QuantitativeSignal:
     confidence: float
     indicators: Dict[str, float] = field(default_factory=dict)
 
-    def __post_init__(self) -> None:
-        if self.action not in ("buy", "sell", "hold"):
-            raise ValueError("action must be 'buy', 'sell', or 'hold'")
-        if not isinstance(self.confidence, (int, float)):
-            raise ValueError("confidence must be a number")
-        if not 0.0 <= self.confidence <= 1.0:
-            raise ValueError("confidence must be in the range [0, 1]")
-
     def __repr__(self) -> str:
-        return (
-            f"QuantitativeSignal(action={self.action}, "
-            f"confidence={self.confidence}, indicators={self.indicators})"
-        )
+        return f"QuantitativeSignal(action={self.action}, confidence={self.confidence}, indicators={self.indicators})"
 
 
 class RawMarketData(BaseModel):
