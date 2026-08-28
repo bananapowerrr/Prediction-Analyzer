@@ -32,3 +32,8 @@ def gate_reject_reasons(market: Market, min_liquidity: float, max_spread: float,
 
 def filter_markets(markets: list[Market], min_liquidity: float, max_spread: float, min_volume: float) -> list[Market]:
     return [market for market in markets if passes_all_gates(market, min_liquidity, max_spread, min_volume)]
+
+def passes_soft_gates(market: Market, min_liquidity: float, max_spread: float, min_volume: float) -> bool:
+    return (passes_liquidity_gate(market, min_liquidity * 0.5) and
+            passes_spread_gate(market, max_spread * 1.5) and
+            passes_volume_gate(market, min_volume * 0.5))

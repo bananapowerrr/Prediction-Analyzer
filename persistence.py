@@ -4,6 +4,7 @@ import os
 import json
 import logging
 import tempfile
+import csv
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +77,19 @@ class PersistenceManager:
             logger.error(f"Ошибка при загрузке файла {path}: {e}")
             return []
 
+    def save_markets_csv(self, path: str, markets: List[Dict]):
+        """Сохранить список dict (id, question, liquidity, spread, volume_24h) в CSV UTF-8 с заголовком."""
+        try:
+            normalized_markets = [{k: v for k, v in market.items() if k in ['id', 'question', 'liquidity', 'spread', 'volume_24h']} for market in markets]
+            with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as temp_file:
+                writer = csv.DictWriter(temp_file, fieldnames=['id', 'question', 'liquidity', 'spread', 'volume_24h'])
+                writer.writeheader()
+                writer.writerows(normalized_markets)
+                temp_path = temp_file.name
+            os.replace(temp_path, path)
+        except IOError as e:
+            logger.error(f"Ошибка при сохранении файла {path}: {e}")
+
 def save_markets_json(path: str, markets: List[Dict]):
     """Сохранить список dict (id, question, liquidity, spread, volume_24h) в JSON UTF-8."""
     try:
@@ -87,13 +101,15 @@ def save_markets_json(path: str, markets: List[Dict]):
     except IOError as e:
         logger.error(f"Ошибка при сохранении файла {path}: {e}")
 
-def load_markets_json(path: str) -> List[Dict]:
-    """Загрузить список dict (id, question, liquidity, spread, volume_24h) из JSON UTF-8. Если файла нет — []."""
+def save_markets_csv(path: str, markets: List[Dict]):
+    """Сохранить список dict (id, question, liquidity, spread, volume_24h) в CSV UTF-8 с заголовком id,question,liquidity,spread,volume_24h."""
     try:
-        with open(path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return []
-    except json.JSONDecodeError as e:
-        logger.error(f"Ошибка при загрузке файла {path}: {e}")
-        return []
+        normalized_markets = [{k: v for k, v in market.items() if k in ['id', 'question', 'liquidity', 'spread', 'volume_24h']} for market in markets]
+        with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as temp_file:
+            writer = csv.DictWriter(temp_file, fieldnames=['id', 'question', 'liquidity', 'spread', 'volume_24h'])
+            writer.writeheader()
+            writer.writerows(normalized_markets)
+            temp_path = temp_file.name
+        os.replace(temp_path, path)
+    except IOError as e:
+        logger.error(f"Ошибка при сохранении файла {path}: {e}")
